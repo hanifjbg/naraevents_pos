@@ -5,6 +5,26 @@ import { Plus, Edit2, Trash2, X, Save, Users, Utensils } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ConfirmDialog } from './Dialogs';
 
+import { MenuForm } from './MenuForm';
+
+const SEED_MENU: Partial<Product>[] = [
+   { name: 'AMERICANO', price: 15000, category: 'Minuman', recipe: 'Espresso: 30ml\nAIR: 150ml\nGelas: CUP 14 Oz\nMethode: Masukkan espresso ke dalam cup, Tuang air' },
+   { name: 'AMERICANO STRAWBERRY', price: 18000, category: 'Minuman', recipe: 'Espresso: 20ml\nAIR: 170ml\nSYRUP STRAWBERRY: 20ml\nGelas: CUP 14 Oz\nMethode: Masukkan espresso ke dalam cup, masukkan syrup, tuang air' },
+   { name: 'ES KOPI SUSU PANDAN', price: 20000, category: 'Minuman', recipe: 'Espresso: 20ml\nSUSU: 100ml\nSYRUP PANDAN: 20ml\nGelas: CUP 14 Oz\nMethode: Masukkan espresso ke dalam cup, masukkan susu, masukkan syrup' },
+   { name: 'ES KOPI SUSU ALMOND', price: 22000, category: 'Minuman', recipe: 'Espresso: 20ml\nSYRUP ALMOND: 20ml\nAIR: 60ml\nUHT milk: 100ml\nEs batu: 150gr\nGelas: HI BALL 14 OZ\nMethode: Tuang syrup ke dalam gelas, Tuang susu UHT lalu stir dengan mixer, masukkan es batu, Tuang espresso' },
+   { name: 'ICE TEA', price: 10000, category: 'Minuman', recipe: 'POWDER TEA: 20gr\nAIR: 150ml\nEs batu: 150gr\nGelas: HI BALL 14 OZ\nMethode: masukkan powder, masukkan air, mixer, tuang es batu' },
+   { name: 'ICE Strawberry TEA', price: 12000, category: 'Minuman', recipe: 'POWDER TEA: 20gr\nSTRAWBERRY syrup: 20ml\nAIR: 150ml\nEs batu: 150gr\nGelas: HI BALL 14 OZ\nMethode: Tuang syrup dan ke dalam gelas, Tuang susu UHT lalu stir dengan mixer, Isi gelas dengan es batu' },
+   { name: 'ICE PANDAN TEA', price: 12000, category: 'Minuman', recipe: 'POWDER TEA: 20gr\nPandan syrup: 20ml\nair: 150ml\nEs batu: 200gr\nGelas: HI BALL 14 OZ\nMethode: Tuang syrup dan powder ke dalam gelas, Tuang air putih, Isi gelas dengan es batu' },
+   { name: 'THAI TEA', price: 15000, category: 'Minuman', recipe: 'powder thai tea: 20gr\nAir putih: 100ml\nsusu: 100ml\nEs batu: 150gr\nGelas: HI BALL 14 OZ\nMethode: tuang powder, Isi gelas dengan es batu, Tuang air putih, masukkan susu' },
+   { name: 'CHOCO MILK', price: 18000, category: 'Minuman', recipe: 'powder coklat: 20gr\nUHT milk: 100ml\nEs batu: 200gr\nGelas: HI BALL 14 OZ\nMethode: Tuang powder ke dalam gelas, Tuang susu UHT lalu stir dengan mixer, Isi gelas dengan es batu' },
+   { name: 'STRAWBERRY MILK', price: 18000, category: 'Minuman', recipe: 'syrup strawberry: 20ml\nsusu: 100ml\nGelas: CUP 7 OZ\nMethode: masukkan syrup, masukkan susu dan es batu' },
+   { name: 'CHOCO ALMOND', price: 20000, category: 'Minuman', recipe: 'Coklat bubuk: 20gr\nsyrup almond: 20ml\nsusu: 100ml\nGelas: CUP 7 OZ\nMethode: Tuang powder dan air ke dalm gelas, masukkan susu dan es batu, masukkan syrup' },
+   { name: 'BLACK PINK', price: 22000, category: 'Minuman', recipe: 'charcoal powder: 20gr\nsyrup strawberry: 20ml\nsusu: 100ml\nEs batu: 150gr\nGelas: HI BALL 11 OZ\nMethode: masukkan syrup dan susu, mixer, pada gelas satunya buat adonan charcoal dan susu' },
+   { name: 'Choco Cheese', price: 22000, category: 'Minuman', recipe: 'choco chese powder: 20gr\nair: 100ml\nsusu: 100ml\nEs batu: 150gr\nGelas: HI BALL 11 OZ\nMethode: masukkan syrup dan susu, mixer, pada gelas satunya buat adonan charcoal dan susu' },
+   { name: 'milky orange', price: 18000, category: 'Minuman', recipe: 'syrup orange: 40ml\nair: 100ml\nsusu: 100ml\nEs batu: 150gr\nGelas: HI BALL 11 OZ\nMethode: masukkan syrup dan susu, mixer, pada gelas satunya buat adonan charcoal dan susu' },
+   { name: 'pink lava', price: 18000, category: 'Minuman', recipe: 'syrup cocopandan: 40ml\nair: 100ml\nsusu: 100ml\nEs batu: 150gr\nGelas: HI BALL 11 OZ\nMethode: masukkan syrup dan susu, mixer, pada gelas satunya buat adonan charcoal dan susu' }
+];
+
 export default function AdminView() {
   const { menu, setMenu, users, updateUser, deleteUser, addUser } = usePos();
   const [activeTab, setActiveTab] = useState<'menu' | 'users'>('menu');
@@ -24,19 +44,7 @@ export default function AdminView() {
      });
   };
 
-  const handleMenuSave = (e: React.FormEvent<HTMLFormElement>) => {
-     e.preventDefault();
-     const fd = new FormData(e.currentTarget);
-     const isBundle = fd.get('isBundle') === 'true';
-     const newM: Product = {
-        id: editingMenu ? editingMenu.id : Math.random().toString(36).substring(2, 10),
-        name: fd.get('name') as string,
-        price: parseInt(fd.get('price') as string, 10),
-        category: fd.get('category') as string,
-        recipe: fd.get('recipe') as string,
-        isBundle,
-     };
-     
+  const handleMenuSave = (newM: Product) => {
      if (editingMenu) {
         setMenu(menu.map(m => m.id === editingMenu.id ? newM : m));
      } else {
@@ -61,6 +69,7 @@ export default function AdminView() {
         username: fd.get('username') as string,
         name: (fd.get('name') as string) || fd.get('username') as string,
         role: fd.get('role') as any,
+        pin: fd.get('pin') as string || undefined,
      };
      
      if (isEditing) {
@@ -70,6 +79,26 @@ export default function AdminView() {
      }
      setEditingUser(null);
      setIsAddingUser(false);
+  };
+
+  const handleSeedMenu = () => {
+    setConfirmData({
+       message: 'Yakin ingin menambahkan seed menu? Ini akan menimpa menu dengan nama yang sama',
+       onConfirm: () => {
+          const freshMenu = [...menu];
+          SEED_MENU.forEach(sm => {
+             const existingIdx = freshMenu.findIndex(m => m.name === sm.name);
+             const generatedId = Math.random().toString(36).substring(2, 10);
+             if (existingIdx !== -1) {
+                 freshMenu[existingIdx] = { ...freshMenu[existingIdx], ...sm, id: freshMenu[existingIdx].id };
+             } else {
+                 freshMenu.push({ ...sm, id: generatedId } as Product);
+             }
+          });
+          setMenu(freshMenu);
+          setConfirmData(null);
+       }
+    });
   };
 
   return (
@@ -87,9 +116,14 @@ export default function AdminView() {
                       <button key={c} onClick={() => setActiveCategory(c)} className={`px-4 py-2 rounded-full font-bold text-sm border ${activeCategory === c ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600'}`}>{c}</button>
                    ))}
                 </div>
-                <button onClick={() => setIsAdding(true)} className="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-1 shadow-sm hover:bg-blue-700">
-                   <Plus className="w-4 h-4" /> Tambah Baru
-                </button>
+                <div className="flex gap-2">
+                   <button onClick={handleSeedMenu} className="bg-amber-100 text-amber-700 hover:bg-amber-200 px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-1 shadow-sm">
+                      <Save className="w-4 h-4" /> Seed Resep PDF
+                   </button>
+                   <button onClick={() => setIsAdding(true)} className="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-1 shadow-sm hover:bg-blue-700">
+                      <Plus className="w-4 h-4" /> Tambah Baru
+                   </button>
+                </div>
              </div>
 
              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -150,40 +184,12 @@ export default function AdminView() {
        )}
 
        {(isAdding || editingMenu) && (
-          <div className="fixed inset-0 bg-slate-900/50 z-50 flex flex-col items-center justify-center p-4">
-             <div className="bg-white w-full max-w-sm rounded-2xl shadow-xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
-                <div className="p-4 border-b bg-slate-50 flex items-center justify-between">
-                   <div className="font-bold">{editingMenu ? 'Edit Menu' : 'Tambah Menu'}</div>
-                   <button onClick={() => {setIsAdding(false); setEditingMenu(null);}}><X className="w-5 h-5 text-slate-500 hover:text-slate-800" /></button>
-                </div>
-                <form onSubmit={handleMenuSave} className="p-4 space-y-4">
-                   <div>
-                      <label className="block text-xs font-bold text-slate-500 mb-1">Nama Menu</label>
-                      <input name="name" required defaultValue={editingMenu?.name} className="w-full border rounded-lg p-2.5 focus:border-blue-500 outline-none" />
-                   </div>
-                   <div>
-                      <label className="block text-xs font-bold text-slate-500 mb-1">Harga (Rp)</label>
-                      <input name="price" type="number" required defaultValue={editingMenu?.price} className="w-full border rounded-lg p-2.5 focus:border-blue-500 outline-none" />
-                   </div>
-                   <div>
-                      <label className="block text-xs font-bold text-slate-500 mb-1">Kategori</label>
-                      <select name="category" required defaultValue={editingMenu?.category || activeCategory} className="w-full border rounded-lg p-2.5 focus:border-blue-500 outline-none bg-white">
-                         {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                      </select>
-                   </div>
-                   <div className="flex items-center gap-2">
-                       <input type="hidden" name="isBundle" value="false" />
-                       <input type="checkbox" name="isBundle" value="true" id="isBundle" defaultChecked={editingMenu?.isBundle} className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
-                       <label htmlFor="isBundle" className="text-xs font-bold text-slate-500">Menu Bundle / Gabungan (Cth: Promo Ramadhan)</label>
-                   </div>
-                   <div>
-                      <label className="block text-xs font-bold text-slate-500 mb-1">Resep / Bahan (Opsional)</label>
-                      <textarea name="recipe" rows={3} defaultValue={editingMenu?.recipe} placeholder="Cth: 1 sdm gula, 1 shot espresso, ATAU isi bundle promonya" className="w-full border rounded-lg p-2.5 focus:border-blue-500 outline-none resize-none"></textarea>
-                   </div>
-                   <button type="submit" className="w-full bg-blue-600 text-white font-bold py-3 rounded-xl mt-4 hover:bg-blue-700 flex justify-center items-center gap-2"><Save className="w-4 h-4" /> Simpan</button>
-                </form>
-             </div>
-          </div>
+          <MenuForm 
+             menuList={menu} 
+             initialData={editingMenu} 
+             onSave={handleMenuSave} 
+             onClose={() => {setIsAdding(false); setEditingMenu(null);}} 
+          />
        )}
 
        {(isAddingUser || editingUser) && (
@@ -209,6 +215,10 @@ export default function AdminView() {
                          <option value="superadmin">Super Admin</option>
                          <option value="bos">Bos (Laporan)</option>
                       </select>
+                   </div>
+                   <div>
+                      <label className="block text-xs font-bold text-slate-500 mb-1">PIN (Opsional, kosong = tanpa PIN)</label>
+                      <input name="pin" type="text" maxLength={6} defaultValue={editingUser?.pin} placeholder="Cth: 1234" className="w-full border rounded-lg p-2.5 focus:border-blue-500 outline-none font-mono tracking-widest text-lg text-center" />
                    </div>
                    <button type="submit" className="w-full bg-blue-600 text-white font-bold py-3 rounded-xl mt-4 hover:bg-blue-700 flex justify-center items-center gap-2"><Save className="w-4 h-4" /> Simpan</button>
                 </form>

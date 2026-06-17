@@ -10,12 +10,14 @@ export interface Product {
   stock?: number;
   recipe?: string;
   isBundle?: boolean;
+  bundleItems?: { productId: string; qty: number }[];
 }
 
 export interface User {
   username: string;
   name?: string;
   role: 'superadmin' | 'bos' | 'kasir';
+  pin?: string;
 }
 
 export interface CartItem {
