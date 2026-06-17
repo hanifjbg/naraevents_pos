@@ -1,18 +1,8 @@
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
+import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+import firebaseConfig from '../firebase-applet-config.json';
 
-let app;
-let db: ReturnType<typeof getFirestore>;
-
-try {
-  const firebaseConfig = require('../firebase-applet-config.json');
-  app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-  db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
-} catch (error) {
-  console.warn('Firebase config not found or invalid. Firebase will not be initialized.');
-  app = null as any;
-  db = null as any;
-}
-
-export { app, db };
+const app = initializeApp(firebaseConfig);
+export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+export const auth = getAuth(app);

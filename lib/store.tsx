@@ -1,10 +1,21 @@
-'use client';
-
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Product, User, INITIAL_MENU, USERS as INITIAL_USERS } from './constants';
-import { generateId } from './utils';
+import { create } from 'zustand';
 import { db } from './firebase';
 import { collection, doc, onSnapshot, setDoc, updateDoc, writeBatch, getDocs, deleteDoc } from 'firebase/firestore';
+
+export interface Product {
+  id: string;
+  name: string;
+  price: number;
+  category: string;
+  stock?: number;
+  recipe?: string;
+}
+
+export interface User {
+  username: string;
+  name?: string;
+  role: 'superadmin' | 'bos' | 'kasir';
+}
 
 export interface CartItem {
   product: Product;
@@ -14,26 +25,24 @@ export interface CartItem {
 export interface Transaction {
   id: string;
   timestamp: string;
-  shiftId: string | null;
-  cashier: string;
   items: CartItem[];
   total: number;
   paymentMethod: 'CASH' | 'QRIS';
-  cashReceived?: number | null;
-  change?: number | null;
-  qrisRef?: string | null;
+  cashReceived?: number;
+  qrisRef?: string;
+  cashier: string;
+  shiftId: string;
   voided?: boolean;
 }
 
 export interface Shift {
   id: string;
+  cashier: string;
   startTime: string;
   endTime?: string;
-  cashierUsername: string;
-  cashierName: string;
   startingCash: number;
-  actualCash?: number;
   expectedCash?: number;
+  actualCash?: number;
   totalSales: number;
   status: 'active' | 'closed';
 }
@@ -46,189 +55,159 @@ interface PosState {
   transactions: Transaction[];
   shifts: Shift[];
   activeShift: Shift | null;
-  login: (username: string, pin: string) => User | null;
-  logout: () => void;
+  setCurrentUser: (user: User | null) => void;
   addToCart: (product: Product) => void;
-  removeFromCart: (productId: string) => void;
   decreaseFromCart: (productId: string) => void;
+  removeFromCart: (productId: string) => void;
   clearCart: () => void;
   checkout: (paymentMethod: 'CASH' | 'QRIS', cashReceived?: number, qrisRef?: string) => Transaction | null;
   voidTransaction: (transactionId: string) => void;
+  deleteTransaction: (transactionId: string) => void;
   startShift: (startingCash: number) => void;
-  endShift: (actualCash: number, expectedCash: number) => void;
+  endShift: (actualCash: number, expectedCash: number, shiftId?: string) => void;
   setMenu: (newMenu: Product[]) => void;
+  addUser: (user: User) => void;
   updateUser: (user: User) => void;
   deleteUser: (username: string) => void;
-  addUser: (user: User) => void;
 }
 
-const PosContext = createContext<PosState | undefined>(undefined);
+let unsubUsers: any;
+let unsubMenu: any;
+let unsubTrans: any;
+let unsubShifts: any;
 
-export function PosProvider({ children }: { children: React.ReactNode }) {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  
-  const [users, setUsers] = useState<User[]>(INITIAL_USERS);
-  const [menu, setMenuState] = useState<Product[]>(INITIAL_MENU);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [shifts, setShifts] = useState<Shift[]>([]);
-  
-  const [cart, setCart] = useState<CartItem[]>([]);
-  const [isHydrated, setIsHydrated] = useState(false);
+export const CATEGORIES = ['Paket Murah', 'Minuman', 'Makanan'];
 
-  const activeShift = currentUser ? shifts.find(s => s.cashierUsername === currentUser.username && s.status === 'active') || null : null;
-
-  useEffect(() => {
-    const storedUser = localStorage.getItem('pos_user');
-    if (storedUser) setCurrentUser(JSON.parse(storedUser));
-    setIsHydrated(true);
-
-    if (!db) return;
-
-    const seedDb = async () => {
-       try {
-           const userSnap = await getDocs(collection(db, 'users'));
-           if (userSnap.empty) {
-              const batch = writeBatch(db);
-              INITIAL_USERS.forEach(u => batch.set(doc(db, 'users', u.username), u));
-              INITIAL_MENU.forEach(m => batch.set(doc(db, 'menu', m.id), m));
-              await batch.commit();
-           }
-       } catch (e: any) {
-           console.error("Firebase seeding failed", e?.message || e);
-       }
-    };
-    seedDb();
-
-    let unsubUsers = () => {};
-    let unsubMenu = () => {};
-    let unsubTrans = () => {};
-    let unsubShifts = () => {};
-
+export const usePos = create<PosState>((set, get) => {
+  if (typeof window !== 'undefined') {
     try {
         unsubUsers = onSnapshot(collection(db, 'users'), (snap) => {
-           setUsers(snap.docs.map(d => d.data() as User));
+           set({ users: snap.docs.map(d => d.data() as User) });
         }, (error) => console.error("Firebase users snap error", error.message));
 
         unsubMenu = onSnapshot(collection(db, 'menu'), (snap) => {
            const m = snap.docs.map(d => d.data() as Product);
-           if (m.length > 0) setMenuState(m);
+           set({ menu: m.length ? m : [] });
         }, (error) => console.error("Firebase menu snap error", error.message));
 
         unsubTrans = onSnapshot(collection(db, 'transactions'), (snap) => {
            const t = snap.docs.map(d => d.data() as Transaction).sort((a,b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-           setTransactions(t);
+           set({ transactions: t });
         }, (error) => console.error("Firebase trans snap error", error.message));
 
         unsubShifts = onSnapshot(collection(db, 'shifts'), (snap) => {
            const s = snap.docs.map(d => d.data() as Shift).sort((a,b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
-           setShifts(s);
+           set({ shifts: s });
         }, (error) => console.error("Firebase shifts snap error", error.message));
     } catch(e: any) {
         console.error("Firebase subscription failed", e?.message || e);
     }
+  }
 
-    return () => {
-       unsubUsers();
-       unsubMenu();
-       unsubTrans();
-       unsubShifts();
-    };
-  }, []);
+  return {
+  currentUser: null,
+  users: [],
+  menu: [],
+  cart: [],
+  transactions: [],
+  shifts: [],
+  activeShift: null,
 
-  useEffect(() => {
-    if (!isHydrated) return;
-    if (currentUser) {
-       localStorage.setItem('pos_user', JSON.stringify(currentUser));
-    } else {
-       localStorage.removeItem('pos_user');
-    }
-  }, [currentUser, isHydrated]);
+  setCurrentUser: (user) => {
+     set({ currentUser: user });
+     if (user) {
+        const active = get().shifts.find(s => s.cashier === user.username && s.status === 'active');
+        set({ activeShift: active || null });
+     } else {
+        set({ activeShift: null });
+     }
+  },
 
-  const login = (username: string, pin: string) => {
-    const user = users.find((u: User) => u.username === username && u.pin === pin);
-    if (user) {
-      setCurrentUser(user);
-      return user;
-    }
-    return null;
-  };
-
-  const logout = () => {
-    setCurrentUser(null);
-    setCart([]);
-  };
-
-  const addToCart = (product: Product) => {
-    setCart((prev) => {
-      const existing = prev.find((item) => item.product.id === product.id);
-      if (existing) {
-        return prev.map((item) =>
+  addToCart: (product) => set((state) => {
+    const existing = state.cart.find((item) => item.product.id === product.id);
+    if (existing) {
+      return {
+        cart: state.cart.map((item) =>
           item.product.id === product.id ? { ...item, qty: item.qty + 1 } : item
-        );
-      }
-      return [...prev, { product, qty: 1 }];
-    });
-  };
+        ),
+      };
+    }
+    return { cart: [...state.cart, { product, qty: 1 }] };
+  }),
 
-  const decreaseFromCart = (productId: string) => {
-    setCart((prev) => {
-      const existing = prev.find((item) => item.product.id === productId);
-      if (existing && existing.qty > 1) {
-        return prev.map((item) =>
+  decreaseFromCart: (productId) => set((state) => {
+    const existing = state.cart.find((item) => item.product.id === productId);
+    if (existing && existing.qty > 1) {
+      return {
+        cart: state.cart.map((item) =>
           item.product.id === productId ? { ...item, qty: item.qty - 1 } : item
-        );
-      } else {
-        return prev.filter((item) => item.product.id !== productId);
-      }
-    });
-  };
+        ),
+      };
+    }
+    return { cart: state.cart.filter((item) => item.product.id !== productId) };
+  }),
 
-  const removeFromCart = (productId: string) => {
-    setCart((prev) => prev.filter((item) => item.product.id !== productId));
-  };
+  removeFromCart: (productId) => set((state) => ({
+    cart: state.cart.filter((item) => item.product.id !== productId)
+  })),
 
-  const clearCart = () => setCart([]);
+  clearCart: () => set({ cart: [] }),
 
-  const checkout = (paymentMethod: 'CASH' | 'QRIS', cashReceived?: number, qrisRef?: string) => {
-    if (!currentUser) return null;
-    const total = cart.reduce((sum, item) => sum + item.product.price * item.qty, 0);
-    const change = cashReceived ? cashReceived - total : 0;
-
-    const transaction: Transaction = {
-      id: generateId(),
+  checkout: (paymentMethod, cashReceived, qrisRef) => {
+    const state = get();
+    if (!state.currentUser) return null;
+    if (!state.activeShift && state.currentUser.role === 'kasir') {
+       return null;
+    }
+    const total = state.cart.reduce((s, item) => s + item.product.price * item.qty, 0);
+    const transaction: any = {
+      id: Math.random().toString(36).substring(2, 10),
       timestamp: new Date().toISOString(),
-      shiftId: activeShift ? activeShift.id : null,
-      cashier: currentUser.name,
-      items: [...cart],
+      items: [...state.cart],
       total,
       paymentMethod,
-      cashReceived: cashReceived ?? null,
-      change: change ?? null,
-      qrisRef: qrisRef ?? null,
-      voided: false,
+      cashier: state.currentUser.username,
+      shiftId: state.activeShift?.id || 'admin-shift'
     };
+    if (cashReceived !== undefined) transaction.cashReceived = cashReceived;
+    if (qrisRef !== undefined) transaction.qrisRef = qrisRef;
 
-    if (db) {
-       setDoc(doc(db, 'transactions', transaction.id), transaction);
-       if (activeShift) {
-          updateDoc(doc(db, 'shifts', activeShift.id), {
-             totalSales: activeShift.totalSales + total
-          });
-       }
+    if (db) setDoc(doc(db, 'transactions', transaction.id), transaction as Transaction);
+
+    set({ cart: [] });
+
+    if (state.activeShift) {
+       const shiftTotal = state.activeShift.totalSales + total;
+       if (db) updateDoc(doc(db, 'shifts', state.activeShift.id), { totalSales: shiftTotal });
+       set({ activeShift: { ...state.activeShift, totalSales: shiftTotal } });
     }
-    
-    setCart([]);
-    return transaction;
-  };
 
-  const voidTransaction = (transactionId: string) => {
-     const tx = transactions.find(t => t.id === transactionId);
+    return transaction;
+  },
+
+  voidTransaction: (transactionId) => {
+     const state = get();
+     const tx = state.transactions.find(t => t.id === transactionId);
      if (!tx || tx.voided) return;
      if (db) {
         updateDoc(doc(db, 'transactions', transactionId), { voided: true });
+        if (state.activeShift && tx.shiftId === state.activeShift.id) {
+           const shiftTotal = state.activeShift.totalSales - tx.total;
+           updateDoc(doc(db, 'shifts', state.activeShift.id), { totalSales: Math.max(0, shiftTotal) });
+           set({ activeShift: { ...state.activeShift, totalSales: Math.max(0, shiftTotal) } });
+        }
+     }
+  },
+
+  deleteTransaction: (transactionId: string) => {
+     const state = get();
+     const tx = state.transactions.find(t => t.id === transactionId);
+     if (!tx) return;
+     if (db) {
+        deleteDoc(doc(db, 'transactions', transactionId));
         
-        if (tx.shiftId) {
-            const shift = shifts.find(s => s.id === tx.shiftId);
+        if (!tx.voided && tx.shiftId) {
+            const shift = state.shifts.find(s => s.id === tx.shiftId);
             if (shift) {
                 updateDoc(doc(db, 'shifts', shift.id), {
                    totalSales: Math.max(0, shift.totalSales - tx.total)
@@ -236,98 +215,64 @@ export function PosProvider({ children }: { children: React.ReactNode }) {
             }
         }
      }
-  };
+  },
 
-  const startShift = (startingCash: number) => {
-    if (!currentUser) return;
-    const shiftId = generateId();
+  startShift: (startingCash) => {
+    const state = get();
+    const user = state.currentUser;
+    if (!user) return;
+    const globalActiveShift = state.shifts.find(s => s.status === 'active');
+    if (globalActiveShift) {
+       throw new Error(`Shift sedang aktif oleh kasir @${globalActiveShift.cashier}. Tidak dapat memulai shift baru.`);
+    }
+    const shiftId = Math.random().toString(36).substring(2, 10);
     const newShift: Shift = {
       id: shiftId,
+      cashier: user.username,
       startTime: new Date().toISOString(),
-      cashierUsername: currentUser.username,
-      cashierName: currentUser.name,
       startingCash,
       totalSales: 0,
       status: 'active'
     };
-    if (db) {
-       setDoc(doc(db, 'shifts', shiftId), newShift);
-    }
-  };
+    if (db) setDoc(doc(db, 'shifts', shiftId), newShift);
+    set({ activeShift: newShift });
+  },
 
-  const endShift = (actualCash: number, expectedCash: number) => {
-    if (!activeShift) return;
+  endShift: (actualCash, expectedCash, shiftId) => {
+    const state = get();
+    const shift = shiftId ? state.shifts.find(s => s.id === shiftId) : state.activeShift;
+    if (!shift) return;
     if (db) {
-       updateDoc(doc(db, 'shifts', activeShift.id), {
-          endTime: new Date().toISOString(),
-          actualCash,
-          expectedCash,
-          status: 'closed'
+        updateDoc(doc(db, 'shifts', shift.id), {
+            endTime: new Date().toISOString(),
+            actualCash,
+            expectedCash,
+            status: 'closed'
+        });
+    }
+    if (state.activeShift?.id === shift.id) {
+       set({ activeShift: null });
+    }
+  },
+
+  setMenu: (newMenu) => {
+    const current = get().menu;
+    if (db) {
+       newMenu.forEach(m => setDoc(doc(db, 'menu', m.id), m));
+       current.forEach(c => {
+         if (!newMenu.find(n => n.id === c.id)) {
+            deleteDoc(doc(db, 'menu', c.id));
+         }
        });
     }
-  };
-
-  const setMenuAction = async (newMenu: Product[]) => {
-    if (!db) return;
-    const currentMap = new Map(menu.map(m => [m.id, m]));
-    const batch = writeBatch(db);
-    newMenu.forEach(m => {
-       batch.set(doc(db, 'menu', m.id), m);
-       currentMap.delete(m.id);
-    });
-    currentMap.forEach((m, id) => {
-       batch.delete(doc(db, 'menu', id));
-    });
-    await batch.commit();
-  };
-
-  const addUser = (user: User) => {
-     if (db) setDoc(doc(db, 'users', user.username), user);
-  };
-
-  const updateUser = (user: User) => {
-     if (db) setDoc(doc(db, 'users', user.username), user);
-  };
-
-  const deleteUserAction = (username: string) => {
-     if (db) deleteDoc(doc(db, 'users', username));
-  };
-
-  if (!isHydrated) return null;
-
-  return (
-    <PosContext.Provider
-      value={{
-        currentUser,
-        users,
-        menu,
-        cart,
-        transactions,
-        shifts,
-        activeShift,
-        login,
-        logout,
-        addToCart,
-        removeFromCart,
-        decreaseFromCart,
-        clearCart,
-        checkout,
-        voidTransaction,
-        startShift,
-        endShift,
-        setMenu: setMenuAction,
-        addUser,
-        updateUser,
-        deleteUser: deleteUserAction
-      }}
-    >
-      {children}
-    </PosContext.Provider>
-  );
-}
-
-export const usePos = () => {
-  const context = useContext(PosContext);
-  if (!context) throw new Error('usePos must be used within PosProvider');
-  return context;
-};
+  },
+  addUser: (user) => {
+    if (db) setDoc(doc(db, 'users', user.username), user);
+  },
+  updateUser: (user) => {
+    if (db) setDoc(doc(db, 'users', user.username), user);
+  },
+  deleteUser: (username) => {
+    if (db) deleteDoc(doc(db, 'users', username));
+  }
+}})

@@ -6,7 +6,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Nyaman POS",
-  description: "POS Application",
+  description: "Point of Sale",
 };
 
 export default function RootLayout({

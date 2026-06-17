@@ -1,18 +1,15 @@
-'use client';
-import { useState } from 'react';
-import { usePos } from '@/lib/store';
-import { CATEGORIES, Product, User } from '@/lib/constants';
-import { formatRupiah, generateId } from '@/lib/utils';
+import React, { useState } from 'react';
+import { usePos, User, Product, CATEGORIES } from '@/lib/store';
+import { formatRupiah } from '@/lib/utils';
 import { Plus, Edit2, Trash2, X, Save, Users, Utensils } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ConfirmDialog } from './Dialogs';
 
 export default function AdminView() {
   const { menu, setMenu, users, updateUser, deleteUser, addUser } = usePos();
-  
   const [activeTab, setActiveTab] = useState<'menu' | 'users'>('menu');
   const [activeCategory, setActiveCategory] = useState(CATEGORIES[0]);
-  const [editingItem, setEditingItem] = useState<Product | null>(null);
+  const [editingMenu, setEditingMenu] = useState<Product | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [isAddingUser, setIsAddingUser] = useState(false);
@@ -30,17 +27,21 @@ export default function AdminView() {
   const handleMenuSave = (e: React.FormEvent<HTMLFormElement>) => {
      e.preventDefault();
      const fd = new FormData(e.currentTarget);
-     const name = fd.get('name') as string;
-     const price = parseInt(fd.get('price') as string, 10);
-     const category = fd.get('category') as string;
-
-     if (editingItem) {
-        setMenu(menu.map(m => m.id === editingItem.id ? { ...m, name, price, category } : m));
-        setEditingItem(null);
+     const newM: Product = {
+        id: editingMenu ? editingMenu.id : Math.random().toString(36).substring(2, 10),
+        name: fd.get('name') as string,
+        price: parseInt(fd.get('price') as string, 10),
+        category: fd.get('category') as string,
+        recipe: fd.get('recipe') as string,
+     };
+     
+     if (editingMenu) {
+        setMenu(menu.map(m => m.id === editingMenu.id ? newM : m));
      } else {
-        setMenu([...menu, { id: generateId(), name, price, category }]);
-        setIsAdding(false);
+        setMenu([...menu, newM]);
      }
+     setEditingMenu(null);
+     setIsAdding(false);
   };
 
   const handleUserDelete = (username: string) => {
@@ -53,132 +54,152 @@ export default function AdminView() {
   const handleUserSave = (e: React.FormEvent<HTMLFormElement>) => {
      e.preventDefault();
      const fd = new FormData(e.currentTarget);
-     const username = fd.get('username') as string;
-     const name = fd.get('name') as string;
-     const pin = fd.get('pin') as string;
-     const role = fd.get('role') as 'superadmin' | 'bos' | 'kasir';
-
-     const userObj: User = { username, name, pin, role };
-
-     if (editingUser) {
-        updateUser(userObj);
-        setEditingUser(null);
+     const isEditing = !!editingUser && !isAddingUser;
+     const newU: User = {
+        username: fd.get('username') as string,
+        name: (fd.get('name') as string) || fd.get('username') as string,
+        role: fd.get('role') as any,
+     };
+     
+     if (isEditing) {
+        updateUser(newU);
      } else {
-        addUser(userObj);
-        setIsAddingUser(false);
+        addUser(newU);
      }
+     setEditingUser(null);
+     setIsAddingUser(false);
   };
 
   return (
-    <div className="flex h-full w-full bg-slate-50 flex-col">
-       <div className="bg-white px-4 border-b border-slate-100 flex gap-4">
-          <button onClick={() => setActiveTab('menu')} className={cn("py-3 font-semibold text-sm border-b-2 flex items-center gap-2", activeTab === 'menu' ? "border-red-600 text-red-600" : "border-transparent text-slate-500 hover:text-slate-800")}>
-             <Utensils className="w-4 h-4" /> Manajemen Menu
-          </button>
-          <button onClick={() => setActiveTab('users')} className={cn("py-3 font-semibold text-sm border-b-2 flex items-center gap-2", activeTab === 'users' ? "border-red-600 text-red-600" : "border-transparent text-slate-500 hover:text-slate-800")}>
-             <Users className="w-4 h-4" /> Pengguna
-          </button>
+    <div className="p-6 h-full overflow-y-auto flex flex-col gap-6 w-full max-w-6xl mx-auto">
+       <div className="flex bg-white rounded-xl shadow-sm border p-1 shrink-0 w-max">
+          <button onClick={() => setActiveTab('menu')} className={`px-6 py-2 rounded-lg font-bold text-sm flex items-center gap-2 ${activeTab === 'menu' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:text-slate-800'}`}><Utensils className="w-4 h-4"/> Menu Makanan</button>
+          <button onClick={() => setActiveTab('users')} className={`px-6 py-2 rounded-lg font-bold text-sm flex items-center gap-2 ${activeTab === 'users' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:text-slate-800'}`}><Users className="w-4 h-4"/> Pengurus & Kasir</button>
        </div>
 
-       { activeTab === 'menu' && (
-          <>
-            <div className="bg-white px-4 py-3 shadow-sm z-10 shrink-0 flex gap-2 overflow-x-auto items-center">
-                  {CATEGORIES.map(cat => (
-                     <button key={cat} onClick={() => setActiveCategory(cat)} className={cn("px-4 py-2 rounded-full whitespace-nowrap text-sm font-semibold transition-all shadow-sm ring-1 ring-inset", activeCategory === cat ? "bg-slate-800 text-white ring-slate-800" : "bg-white text-slate-600 ring-slate-200 hover:bg-slate-50")}>
-                        {cat}
-                     </button>
-                  ))}
-                  <div className="flex-1" />
-                  <button onClick={() => setIsAdding(true)} className="flex items-center gap-1 bg-red-600 text-white px-3 py-2 rounded-full text-sm font-bold shadow hover:bg-red-700">
-                     <Plus className="w-4 h-4" /> Menu Baru
-                  </button>
-            </div>
-            <div className="flex-1 overflow-y-auto p-4 content-start space-y-3">
-               {filteredMenu.map(product => (
-                  <div key={product.id} className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
-                     <div>
-                        <h3 className="font-bold text-slate-800">{product.name}</h3>
-                        <div className="text-red-600 font-semibold text-sm">{formatRupiah(product.price)}</div>
-                     </div>
-                     <div className="flex gap-2">
-                        <button onClick={() => setEditingItem(product)} className="p-2 w-10 h-10 flex items-center justify-center text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl"><Edit2 className="w-4 h-4" /></button>
-                        <button onClick={() => handleMenuDelete(product.id)} className="p-2 w-10 h-10 flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl"><Trash2 className="w-4 h-4" /></button>
-                     </div>
-                  </div>
-               ))}
-            </div>
-          </>
-       )}
-
-       { activeTab === 'users' && (
-          <>
-            <div className="bg-white px-4 py-3 shadow-sm z-10 shrink-0 flex justify-between items-center">
-               <h2 className="font-bold text-slate-800">Daftar Pengguna / Kasir</h2>
-               <button onClick={() => setIsAddingUser(true)} className="flex items-center gap-1 bg-slate-900 text-white px-3 py-2 rounded-full text-sm font-bold shadow hover:bg-slate-800">
-                  <Plus className="w-4 h-4" /> User Baru
-               </button>
-            </div>
-            <div className="flex-1 overflow-y-auto p-4 content-start space-y-3">
-               {users.map(user => (
-                  <div key={user.username} className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
-                     <div>
-                        <h3 className="font-bold text-slate-800">{user.name}</h3>
-                        <div className="text-slate-500 font-medium text-sm flex gap-3 mt-1">
-                           <span>@{user.username}</span>
-                           <span className={cn("px-2 rounded text-[10px] uppercase font-bold flex items-center", user.role === 'superadmin' ? "bg-purple-100 text-purple-700" : user.role === 'bos' ? "bg-amber-100 text-amber-700" : "bg-blue-100 text-blue-700")}>
-                              {user.role}
-                           </span>
-                        </div>
-                     </div>
-                     <div className="flex items-center gap-2">
-                        <button onClick={() => setEditingUser(user)} className="p-2 w-10 h-10 flex items-center justify-center text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl"><Edit2 className="w-4 h-4" /></button>
-                        {user.role !== 'superadmin' && (
-                           <button onClick={() => handleUserDelete(user.username)} className="p-2 w-10 h-10 flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl"><Trash2 className="w-4 h-4" /></button>
-                        )}
-                     </div>
-                  </div>
-               ))}
-            </div>
-          </>
-       )}
-
-       {/* Editor Modals */}
-       {(isAdding || editingItem) && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
-             <div className="w-full max-w-sm bg-white rounded-2xl shadow-2xl overflow-hidden">
-                <div className="p-4 border-b border-slate-100 flex justify-between bg-slate-50 items-center">
-                   <h3 className="font-bold text-lg">{editingItem ? 'Edit Menu' : 'Tambah Menu'}</h3>
-                   <button onClick={() => { setIsAdding(false); setEditingItem(null); }}><X className="w-5 h-5"/></button>
+       {activeTab === 'menu' && (
+          <div className="flex flex-col gap-6">
+             <div className="flex items-center justify-between">
+                <div className="flex gap-2">
+                   {CATEGORIES.map(c => (
+                      <button key={c} onClick={() => setActiveCategory(c)} className={`px-4 py-2 rounded-full font-bold text-sm border ${activeCategory === c ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600'}`}>{c}</button>
+                   ))}
                 </div>
-                <form onSubmit={handleMenuSave} className="p-5 space-y-4">
-                   <input name="name" defaultValue={editingItem?.name} required className="w-full border p-3 rounded-xl" placeholder="Nama Menu" />
-                   <input name="price" type="number" defaultValue={editingItem?.price} required className="w-full border p-3 rounded-xl" placeholder="Harga" />
-                   <select name="category" defaultValue={editingItem?.category || activeCategory} className="w-full border p-3 rounded-xl">
-                      {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                   </select>
-                   <button type="submit" className="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl"><Save className="w-5 h-5 inline mr-2"/>Simpan</button>
+                <button onClick={() => setIsAdding(true)} className="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-1 shadow-sm hover:bg-blue-700">
+                   <Plus className="w-4 h-4" /> Tambah Baru
+                </button>
+             </div>
+
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {filteredMenu.map(item => (
+                   <div key={item.id} className="bg-white p-4 rounded-xl shadow-sm border flex flex-col gap-2 relative group">
+                      <div className="font-bold text-slate-800">{item.name}</div>
+                      <div className="text-blue-600 font-black">{formatRupiah(item.price)}</div>
+                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 bg-white p-1 rounded-lg border shadow-sm">
+                         <button onClick={() => setEditingMenu(item)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded"><Edit2 className="w-4 h-4" /></button>
+                         <button onClick={() => handleMenuDelete(item.id)} className="p-1.5 text-red-600 hover:bg-red-50 rounded"><Trash2 className="w-4 h-4" /></button>
+                      </div>
+                   </div>
+                ))}
+            </div>
+          </div>
+       )}
+
+       {activeTab === 'users' && (
+          <div className="flex flex-col gap-6">
+             <div className="flex items-center justify-end">
+                <button onClick={() => {setIsAddingUser(true); setEditingUser(null);}} className="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-1 shadow-sm hover:bg-blue-700">
+                   <Plus className="w-4 h-4" /> Pengguna Baru
+                </button>
+             </div>
+
+             <div className="overflow-x-auto bg-white rounded-xl shadow-sm border">
+                <table className="w-full text-left text-sm">
+                   <thead className="bg-slate-50 border-b">
+                      <tr>
+                         <th className="p-4 font-semibold text-slate-600">Username</th>
+                         <th className="p-4 font-semibold text-slate-600">Nama Lengkap</th>
+                         <th className="p-4 font-semibold text-slate-600">Peran Role</th>
+                         <th className="p-4 font-semibold text-slate-600 text-right">Aksi</th>
+                      </tr>
+                   </thead>
+                   <tbody className="divide-y">
+                      {users.map(u => (
+                          <tr key={u.username} className="hover:bg-slate-50">
+                             <td className="p-4 font-mono font-medium text-slate-800">@{u.username}</td>
+                             <td className="p-4 text-slate-600">{u.name}</td>
+                             <td className="p-4">
+                                <span className={cn("px-2 py-1 uppercase text-[10px] font-bold rounded-md", u.role === 'bos' || u.role === 'superadmin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700')}>{u.role}</span>
+                             </td>
+                             <td className="p-4 flex gap-2 justify-end">
+                                <button onClick={() => setEditingUser(u)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg border border-transparent hover:border-blue-100"><Edit2 className="w-4 h-4" /></button>
+                                <button onClick={() => handleUserDelete(u.username)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg border border-transparent hover:border-red-100"><Trash2 className="w-4 h-4" /></button>
+                             </td>
+                          </tr>
+                      ))}
+                   </tbody>
+                </table>
+             </div>
+          </div>
+       )}
+
+       {(isAdding || editingMenu) && (
+          <div className="fixed inset-0 bg-slate-900/50 z-50 flex flex-col items-center justify-center p-4">
+             <div className="bg-white w-full max-w-sm rounded-2xl shadow-xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+                <div className="p-4 border-b bg-slate-50 flex items-center justify-between">
+                   <div className="font-bold">{editingMenu ? 'Edit Menu' : 'Tambah Menu'}</div>
+                   <button onClick={() => {setIsAdding(false); setEditingMenu(null);}}><X className="w-5 h-5 text-slate-500 hover:text-slate-800" /></button>
+                </div>
+                <form onSubmit={handleMenuSave} className="p-4 space-y-4">
+                   <div>
+                      <label className="block text-xs font-bold text-slate-500 mb-1">Nama Menu</label>
+                      <input name="name" required defaultValue={editingMenu?.name} className="w-full border rounded-lg p-2.5 focus:border-blue-500 outline-none" />
+                   </div>
+                   <div>
+                      <label className="block text-xs font-bold text-slate-500 mb-1">Harga (Rp)</label>
+                      <input name="price" type="number" required defaultValue={editingMenu?.price} className="w-full border rounded-lg p-2.5 focus:border-blue-500 outline-none" />
+                   </div>
+                   <div>
+                      <label className="block text-xs font-bold text-slate-500 mb-1">Kategori</label>
+                      <select name="category" required defaultValue={editingMenu?.category || activeCategory} className="w-full border rounded-lg p-2.5 focus:border-blue-500 outline-none bg-white">
+                         {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                      </select>
+                   </div>
+                   <div>
+                      <label className="block text-xs font-bold text-slate-500 mb-1">Resep Racikan (Opsional)</label>
+                      <textarea name="recipe" rows={3} defaultValue={editingMenu?.recipe} placeholder="Cth: 1 sdm gula, 1 shot espresso" className="w-full border rounded-lg p-2.5 focus:border-blue-500 outline-none resize-none"></textarea>
+                   </div>
+                   <button type="submit" className="w-full bg-blue-600 text-white font-bold py-3 rounded-xl mt-4 hover:bg-blue-700 flex justify-center items-center gap-2"><Save className="w-4 h-4" /> Simpan</button>
                 </form>
              </div>
           </div>
        )}
 
        {(isAddingUser || editingUser) && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
-             <div className="w-full max-w-sm bg-white rounded-2xl shadow-2xl overflow-hidden">
-                <div className="p-4 border-b border-slate-100 flex justify-between bg-slate-50 items-center">
-                   <h3 className="font-bold text-lg">{editingUser ? 'Edit User' : 'Tambah User'}</h3>
-                   <button onClick={() => { setIsAddingUser(false); setEditingUser(null); }}><X className="w-5 h-5"/></button>
+          <div className="fixed inset-0 bg-slate-900/50 z-50 flex flex-col items-center justify-center p-4">
+             <div className="bg-white w-full max-w-sm rounded-2xl shadow-xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+                <div className="p-4 border-b bg-slate-50 flex items-center justify-between">
+                   <div className="font-bold">{editingUser ? 'Edit Pengguna' : 'Tambah Pengguna'}</div>
+                   <button onClick={() => {setIsAddingUser(false); setEditingUser(null);}}><X className="w-5 h-5 text-slate-500 hover:text-slate-800" /></button>
                 </div>
-                <form onSubmit={handleUserSave} className="p-5 space-y-4">
-                   <input name="name" defaultValue={editingUser?.name} required className="w-full border p-3 rounded-xl" placeholder="Nama Lengkap" />
-                   <input name="username" defaultValue={editingUser?.username} readOnly={!!editingUser} required className="w-full border p-3 rounded-xl read-only:bg-slate-100" placeholder="Username" />
-                   <input name="pin" type="text" inputMode="numeric" defaultValue={editingUser?.pin} required className="w-full border p-3 rounded-xl" placeholder="PIN" />
-                   <select name="role" defaultValue={editingUser?.role || 'kasir'} className="w-full border p-3 rounded-xl">
-                      <option value="kasir">Kasir</option>
-                      <option value="bos">Bos</option>
-                      <option value="superadmin">Super Admin</option>
-                   </select>
-                   <button type="submit" className="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl"><Save className="w-5 h-5 inline mr-2"/>Simpan</button>
+                <form onSubmit={handleUserSave} className="p-4 space-y-4">
+                   <div>
+                      <label className="block text-xs font-bold text-slate-500 mb-1">Username</label>
+                      <input name="username" required readOnly={!!editingUser && !isAddingUser} defaultValue={editingUser?.username} className="w-full border rounded-lg p-2.5 focus:border-blue-500 outline-none read-only:bg-slate-100" />
+                   </div>
+                   <div>
+                      <label className="block text-xs font-bold text-slate-500 mb-1">Nama Lengkap</label>
+                      <input name="name" required defaultValue={editingUser?.name} className="w-full border rounded-lg p-2.5 focus:border-blue-500 outline-none" />
+                   </div>
+                   <div>
+                      <label className="block text-xs font-bold text-slate-500 mb-1">Role</label>
+                      <select name="role" required defaultValue={editingUser?.role || 'kasir'} className="w-full border rounded-lg p-2.5 focus:border-blue-500 outline-none bg-white">
+                         <option value="kasir">Kasir</option>
+                         <option value="superadmin">Super Admin</option>
+                         <option value="bos">Bos (Laporan)</option>
+                      </select>
+                   </div>
+                   <button type="submit" className="w-full bg-blue-600 text-white font-bold py-3 rounded-xl mt-4 hover:bg-blue-700 flex justify-center items-center gap-2"><Save className="w-4 h-4" /> Simpan</button>
                 </form>
              </div>
           </div>
