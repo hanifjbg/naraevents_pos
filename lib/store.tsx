@@ -9,6 +9,7 @@ export interface Product {
   category: string;
   stock?: number;
   recipe?: string;
+  isBundle?: boolean;
 }
 
 export interface User {

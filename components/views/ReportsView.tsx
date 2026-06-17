@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { usePos, Transaction, Shift } from '@/lib/store';
+import { usePos, Transaction } from '@/lib/store';
 import { formatRupiah } from '@/lib/utils';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import ReceiptModal from './ReceiptModal';
@@ -195,13 +195,16 @@ export default function ReportsView() {
                      <td className="p-4 text-slate-600">
                         {s.status === 'active' ? (
                            <>
-                              <span className="text-green-600 font-bold text-xs uppercase bg-green-50 px-2 py-1 rounded block mb-1 w-max">Shift Aktif</span>
+                              <span className="text-green-600 font-bold text-xs uppercase bg-green-50 px-2 py-1 rounded block w-max mb-1">Shift Aktif</span>
                               {['superadmin', 'bos'].includes(currentUser?.role || '') && (
                                  <button onClick={() => {
                                     const expected = s.startingCash + s.totalSales;
                                     setConfirmData({
-                                       message: `Paksa Akhiri Shift ${s.cashier}? (Sistem akan menganggap uang laci = ${formatRupiah(expected)})`,
-                                       onConfirm: () => endShift(expected, expected, s.id)
+                                       message: `Paksa Akhiri Shift ${s.cashier}? (Sistem menganggap uang setor = ${formatRupiah(expected)})`,
+                                       onConfirm: () => {
+                                          endShift(expected, expected, s.id);
+                                          setConfirmData(null);
+                                       }
                                     });
                                  }} className="text-[10px] bg-red-100 text-red-600 px-2 py-1 rounded font-bold hover:bg-red-200 flex items-center gap-1 w-max">
                                     <PowerOff className="w-3 h-3" /> Force End

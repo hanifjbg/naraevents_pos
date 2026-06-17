@@ -27,12 +27,14 @@ export default function AdminView() {
   const handleMenuSave = (e: React.FormEvent<HTMLFormElement>) => {
      e.preventDefault();
      const fd = new FormData(e.currentTarget);
+     const isBundle = fd.get('isBundle') === 'true';
      const newM: Product = {
         id: editingMenu ? editingMenu.id : Math.random().toString(36).substring(2, 10),
         name: fd.get('name') as string,
         price: parseInt(fd.get('price') as string, 10),
         category: fd.get('category') as string,
         recipe: fd.get('recipe') as string,
+        isBundle,
      };
      
      if (editingMenu) {
@@ -93,8 +95,12 @@ export default function AdminView() {
              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {filteredMenu.map(item => (
                    <div key={item.id} className="bg-white p-4 rounded-xl shadow-sm border flex flex-col gap-2 relative group">
-                      <div className="font-bold text-slate-800">{item.name}</div>
+                      <div className="font-bold text-slate-800 flex items-start justify-between">
+                         {item.name}
+                         {item.isBundle && <span className="bg-purple-100 text-purple-700 text-[10px] px-1.5 py-0.5 rounded uppercase font-black tracking-wider">Bundle</span>}
+                      </div>
                       <div className="text-blue-600 font-black">{formatRupiah(item.price)}</div>
+                      {item.recipe && <div className="text-xs text-slate-500 line-clamp-2 mt-1">{item.recipe}</div>}
                       <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 bg-white p-1 rounded-lg border shadow-sm">
                          <button onClick={() => setEditingMenu(item)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded"><Edit2 className="w-4 h-4" /></button>
                          <button onClick={() => handleMenuDelete(item.id)} className="p-1.5 text-red-600 hover:bg-red-50 rounded"><Trash2 className="w-4 h-4" /></button>
@@ -165,9 +171,14 @@ export default function AdminView() {
                          {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                       </select>
                    </div>
+                   <div className="flex items-center gap-2">
+                       <input type="hidden" name="isBundle" value="false" />
+                       <input type="checkbox" name="isBundle" value="true" id="isBundle" defaultChecked={editingMenu?.isBundle} className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
+                       <label htmlFor="isBundle" className="text-xs font-bold text-slate-500">Menu Bundle / Gabungan (Cth: Promo Ramadhan)</label>
+                   </div>
                    <div>
-                      <label className="block text-xs font-bold text-slate-500 mb-1">Resep Racikan (Opsional)</label>
-                      <textarea name="recipe" rows={3} defaultValue={editingMenu?.recipe} placeholder="Cth: 1 sdm gula, 1 shot espresso" className="w-full border rounded-lg p-2.5 focus:border-blue-500 outline-none resize-none"></textarea>
+                      <label className="block text-xs font-bold text-slate-500 mb-1">Resep / Bahan (Opsional)</label>
+                      <textarea name="recipe" rows={3} defaultValue={editingMenu?.recipe} placeholder="Cth: 1 sdm gula, 1 shot espresso, ATAU isi bundle promonya" className="w-full border rounded-lg p-2.5 focus:border-blue-500 outline-none resize-none"></textarea>
                    </div>
                    <button type="submit" className="w-full bg-blue-600 text-white font-bold py-3 rounded-xl mt-4 hover:bg-blue-700 flex justify-center items-center gap-2"><Save className="w-4 h-4" /> Simpan</button>
                 </form>
