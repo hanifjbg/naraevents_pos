@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { Transaction } from '@/lib/store';
+import { Transaction, usePos } from '@/lib/store';
 import { formatRupiah } from '@/lib/utils';
 import { CheckCircle2, Printer, X, FileText } from 'lucide-react';
+import Link from 'next/link';
 
 export default function ReceiptModal({ tx, onClose }: { tx: Transaction, onClose: () => void }) {
   const [showRecipe, setShowRecipe] = useState(false);
+  const { menu } = usePos();
 
   return (
     <div className="fixed inset-0 bg-slate-900/50 z-[200] flex flex-col items-center justify-center p-4 print:p-0 print:bg-white animate-in fade-in duration-200">
@@ -43,8 +45,12 @@ export default function ReceiptModal({ tx, onClose }: { tx: Transaction, onClose
               </div>
               
               <div className="p-4 flex gap-2 w-full bg-slate-100 print:hidden justify-center shrink-0 flex-wrap">
-                 <button onClick={() => window.print()} className="flex-1 py-3 bg-slate-800 text-white font-bold rounded shadow text-xs flex items-center justify-center gap-1 hover:bg-slate-700"><Printer className="w-4 h-4"/> Print / PDF</button>
-                 <button onClick={() => setShowRecipe(true)} className="flex-1 py-3 bg-amber-100 text-amber-700 font-bold rounded shadow text-xs flex items-center justify-center gap-1 hover:bg-amber-200"><FileText className="w-4 h-4"/> Resep</button>
+                 <Link href={`/print/${tx.id}`} target="_blank" className="flex-1 py-3 bg-slate-800 text-white font-bold rounded shadow text-xs flex items-center justify-center gap-1 hover:bg-slate-700">
+                    <Printer className="w-4 h-4"/> Tab Nota
+                 </Link>
+                 <button onClick={() => setShowRecipe(true)} className="flex-1 py-3 bg-amber-100 text-amber-700 font-bold rounded shadow text-xs flex items-center justify-center gap-1 hover:bg-amber-200">
+                    <FileText className="w-4 h-4"/> Resep
+                 </button>
                  <button onClick={onClose} className="w-full py-3 bg-blue-600 text-white font-bold rounded shadow text-xs hover:bg-blue-700 mt-2">SELESAI</button>
               </div>
            </div>
@@ -61,9 +67,31 @@ export default function ReceiptModal({ tx, onClose }: { tx: Transaction, onClose
                           <span>{i.product.name}</span>
                           <span className="bg-amber-200 px-2 py-0.5 rounded text-xs">x{i.qty}</span>
                        </div>
-                       <div className="text-amber-800 text-xs whitespace-pre-wrap font-medium">
-                          {i.product.recipe || "Tidak ada resep tersimpan."}
-                       </div>
+                       
+                       {i.product.isBundle && i.product.bundleItems ? (
+                           <div className="space-y-3 mt-2">
+                               {i.product.bundleItems.map(b => {
+                                   const bp = menu.find(m => m.id === b.productId);
+                                   return (
+                                       <div key={b.productId} className="pl-3 border-l-2 border-amber-300">
+                                            <div className="font-bold text-xs text-amber-900 mb-1">{bp?.name} <span className="bg-amber-200 px-1 py-0.5 rounded ml-1 text-[10px]">x{b.qty * i.qty}</span></div>
+                                            <div className="text-amber-800 text-xs whitespace-pre-wrap font-medium">
+                                                {bp?.recipe || "Tidak ada resep."}
+                                            </div>
+                                       </div>
+                                   )
+                               })}
+                               {i.product.recipe && (
+                                   <div className="text-amber-800 text-xs whitespace-pre-wrap font-medium mt-3 pt-3 border-t border-amber-200">
+                                      {i.product.recipe}
+                                   </div>
+                               )}
+                           </div>
+                       ) : (
+                           <div className="text-amber-800 text-xs whitespace-pre-wrap font-medium mt-2">
+                              {i.product.recipe || "Tidak ada resep tersimpan."}
+                           </div>
+                       )}
                     </div>
                  ))}
               </div>
