@@ -60,21 +60,21 @@ export default function DashboardView() {
 
   return (
     <div className="flex flex-col md:flex-row h-full w-full relative">
-      <div className="flex-1 flex flex-col min-h-[50%] h-1/2 md:h-full bg-slate-50 relative">
-        <div className="bg-white p-3 md:p-4 shadow-sm flex flex-col gap-3 shrink-0 border-b relative">
+      <div className="flex-1 flex flex-col min-h-[50%] h-1/2 md:h-full bg-transparent relative">
+        <div className="bg-white p-3 md:p-4 border-b-[3px] border-black flex flex-col gap-3 shrink-0 relative">
           <div className="flex items-center gap-2">
             <div className="flex-1 relative">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input type="text" placeholder="Cari menu..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full pl-9 pr-4 py-2 bg-slate-100 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:bg-white" />
+              <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-black" />
+              <input type="text" placeholder="Cari menu..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full pl-10 pr-4 py-2 border-[3px] border-black font-bold text-black focus:outline-none focus:bg-neo-yellow/20" />
             </div>
-            <button onClick={() => setActiveModal('history')} className="px-3 py-2 bg-white border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 shadow-sm flex items-center font-bold text-sm shrink-0">
+            <button onClick={() => setActiveModal('history')} className="px-3 py-2 bg-neo-pink border-[3px] border-black text-black font-bold text-sm shadow-neo hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-none active:scale-95 shrink-0 flex items-center transition-all">
                <Clock className="w-4 h-4 mr-1" /> Riwayat
             </button>
           </div>
           {!searchQuery && (
-            <div className="flex gap-2 overflow-x-auto hide-scrollbar">
+            <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-2">
               {CATEGORIES.map(cat => (
-                <button key={cat} onClick={() => setActiveCategory(cat)} className={`px-4 py-2 rounded-full font-bold text-sm whitespace-nowrap shadow-sm border transition-colors ${activeCategory === cat ? 'bg-slate-800 text-white border-slate-800' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}`}>
+                <button key={cat} onClick={() => setActiveCategory(cat)} className={`px-4 py-2 font-black uppercase text-sm whitespace-nowrap border-[3px] border-black transition-all ${activeCategory === cat ? 'bg-black text-white shadow-neo translate-y-[-2px]' : 'bg-white text-black hover:bg-neo-yellow'}`}>
                   {cat}
                 </button>
               ))}
@@ -83,9 +83,9 @@ export default function DashboardView() {
         </div>
         <div className="flex-1 p-4 overflow-y-auto grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-start content-start hide-scrollbar">
           {filteredMenu.map(item => (
-            <button key={item.id} onClick={() => addToCart(item)} className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-start gap-2 hover:border-blue-300 hover:shadow-md transition-all active:scale-95 text-left">
-              <div className="font-bold text-slate-800 text-sm">{item.name}</div>
-              <div className="text-blue-600 font-black flex-1 flex flex-col justify-end text-sm">{formatRupiah(item.price)}</div>
+            <button key={item.id} onClick={() => addToCart(item)} className="bg-white p-4 border-[3px] border-black shadow-neo flex flex-col items-start gap-2 hover:bg-neo-yellow hover:-translate-y-1 hover:-translate-x-1 hover:shadow-neo-lg transition-all active:translate-y-0 active:translate-x-0 active:shadow-none text-left">
+              <div className="font-black text-black text-sm uppercase leading-tight">{item.name}</div>
+              <div className="bg-neo-green px-2 py-1 border-2 border-black font-black text-black text-xs">{formatRupiah(item.price)}</div>
             </button>
           ))}
           {filteredMenu.length === 0 && (
@@ -95,58 +95,58 @@ export default function DashboardView() {
 
       </div>
       
-      <div className="w-full md:w-96 bg-white border-l shadow-2xl flex flex-col h-1/2 md:h-full relative z-10 shrink-0">
+      <div className="w-full md:w-96 bg-white border-l-[3px] border-black flex flex-col h-1/2 md:h-full relative z-10 shrink-0">
         {!activeShift && currentUser?.role === 'kasir' ? (
-           <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-4 bg-slate-50">
-              <div className="w-16 h-16 bg-blue-100 text-blue-600 flex items-center justify-center rounded-full"><Clock className="w-8 h-8" /></div>
-              <h2 className="text-xl font-black">Shift Belum Dimulai</h2>
-              <p className="text-sm text-slate-500">Anda harus memulai shift sebelum dapat memproses transaksi.</p>
-              <button onClick={() => setActiveModal('startshift')} className="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-blue-700 active:scale-95 transition-transform">Mulai Shift Sekarang</button>
+           <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-4 bg-neo-yellow">
+              <div className="w-16 h-16 bg-white border-[3px] border-black text-black flex items-center justify-center shadow-neo"><Clock className="w-8 h-8" /></div>
+              <h2 className="text-2xl font-black uppercase text-black">Shift Belum Dimulai</h2>
+              <p className="text-sm font-bold text-black border-2 border-black bg-white p-2">Anda harus memulai shift sebelum dapat memproses transaksi.</p>
+              <button onClick={() => setActiveModal('startshift')} className="w-full bg-neo-blue text-black border-[3px] border-black shadow-neo font-black py-4 hover:bg-blue-400 active:translate-y-1 active:translate-x-1 active:shadow-none transition-all uppercase">Mulai Shift Sekarang</button>
            </div>
         ) : (
           <>
-            <div className="p-4 border-b bg-slate-50 flex items-center justify-between shrink-0">
-               <div className="font-bold text-lg flex items-center gap-2"><ShoppingCart className="w-5 h-5"/> Pesanan</div>
-               {cart.length > 0 && <button onClick={() => clearCart()} className="text-sm font-bold text-red-500 hover:text-red-700 p-1">Hapus Semua</button>}
+            <div className="p-4 border-b-[3px] border-black bg-neo-yellow flex items-center justify-between shrink-0">
+               <div className="font-black text-lg flex items-center gap-2 uppercase"><ShoppingCart className="w-6 h-6"/> Pesanan</div>
+               {cart.length > 0 && <button onClick={() => clearCart()} className="text-sm font-black bg-white border-2 border-black px-2 py-1 shadow-sm hover:bg-neo-red hover:text-white">HAPUS</button>}
                {activeShift && (
-                  <button onClick={() => setActiveModal('endshift')} className="text-xs bg-red-100 text-red-600 font-bold px-3 py-1.5 rounded-md hover:bg-red-200">Akhiri Shift</button>
+                  <button onClick={() => setActiveModal('endshift')} className="text-xs bg-neo-red text-white border-2 border-black font-black px-3 py-1.5 shadow-sm hover:bg-red-500 uppercase">Akhiri Shift</button>
                )}
             </div>
             
-            <div className="flex-1 overflow-y-auto p-2 hide-scrollbar">
+            <div className="flex-1 overflow-y-auto p-2 hide-scrollbar bg-white">
               {cart.map(item => (
-                <div key={item.product.id} className="bg-white p-3 border-b flex flex-col gap-2 relative group hover:bg-slate-50">
+                <div key={item.product.id} className="bg-white p-3 border-[2px] border-black shadow-sm mb-2 flex flex-col gap-2 relative group hover:bg-neo-yellow transition-colors">
                    <div className="flex justify-between items-start pr-8">
-                     <div className="font-bold text-sm text-slate-800 leading-tight">{item.product.name}</div>
-                     <div className="font-bold text-sm shrink-0 ml-2">{formatRupiah(item.product.price * item.qty)}</div>
+                     <div className="font-black text-sm text-black uppercase leading-tight">{item.product.name}</div>
+                     <div className="font-black text-sm shrink-0 ml-2 bg-white px-1 border-2 border-black">{formatRupiah(item.product.price * item.qty)}</div>
                    </div>
                    <div className="flex items-center gap-3">
-                     <div className="flex items-center border rounded-lg bg-white shadow-sm overflow-hidden text-sm">
-                        <button onClick={() => decreaseFromCart(item.product.id)} className="px-3 py-1 hover:bg-slate-100 text-slate-600 transition-colors"><Minus className="w-3 h-3" /></button>
-                        <span className="font-bold w-6 text-center">{item.qty}</span>
-                        <button onClick={() => addToCart(item.product)} className="px-3 py-1 hover:bg-slate-100 text-slate-600 transition-colors"><Plus className="w-3 h-3" /></button>
+                     <div className="flex items-center border-[2px] border-black bg-white shadow-sm overflow-hidden text-sm">
+                        <button onClick={() => decreaseFromCart(item.product.id)} className="px-3 py-1 hover:bg-neo-pink text-black font-black transition-colors border-r-2 border-black"><Minus className="w-3 h-3" /></button>
+                        <span className="font-black w-8 text-center">{item.qty}</span>
+                        <button onClick={() => addToCart(item.product)} className="px-3 py-1 hover:bg-neo-green text-black font-black transition-colors border-l-2 border-black"><Plus className="w-3 h-3" /></button>
                      </div>
-                     <div className="text-xs text-slate-400 font-medium">@ {formatRupiah(item.product.price)}</div>
+                     <div className="text-xs text-black font-bold border-b-2 border-black border-dashed">@ {formatRupiah(item.product.price)}</div>
                    </div>
-                   <button onClick={() => removeFromCart(item.product.id)} className="absolute top-3 right-3 text-red-400 hover:text-red-600 bg-white p-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-sm"><Trash2 className="w-4 h-4" /></button>
+                   <button onClick={() => removeFromCart(item.product.id)} className="absolute top-3 right-3 text-white bg-black hover:bg-neo-red p-1 opacity-0 group-hover:opacity-100 transition-opacity border-2 border-black shadow-sm"><Trash2 className="w-4 h-4" /></button>
                 </div>
               ))}
               {cart.length === 0 && (
-                 <div className="h-full flex flex-col items-center justify-center text-slate-400 font-medium text-sm space-y-2 opacity-50 p-6 text-center">
+                 <div className="h-full flex flex-col items-center justify-center text-black font-black text-sm space-y-2 opacity-50 p-6 text-center uppercase">
                     <ShoppingCart className="w-12 h-12 mb-2" />
-                    Belum ada menu yang dipilih. Klik menu di samping untuk menambahkan.
+                    Belum ada menu yang dipilih.
                  </div>
               )}
             </div>
 
-            <div className="p-4 bg-white border-t flex flex-col gap-3 shrink-0 shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.05)]">
-              <div className="flex justify-between items-end mb-2">
-                <div className="text-sm font-bold text-slate-500">TOTAL TAGIHAN</div>
-                <div className="text-3xl font-black text-slate-800 tracking-tight">{formatRupiah(total)}</div>
+            <div className="p-4 bg-white border-t-[3px] border-black flex flex-col gap-3 shrink-0">
+              <div className="flex justify-between items-end mb-2 border-[3px] border-black bg-neo-yellow p-2 shadow-neo">
+                <div className="text-sm font-black text-black">TOTAL</div>
+                <div className="text-3xl font-black text-black tracking-tight">{formatRupiah(total)}</div>
               </div>
-              <div className="grid grid-cols-2 gap-2">
-                 <button onClick={() => setActiveModal('cash')} disabled={cart.length === 0} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-500/30 disabled:opacity-50 disabled:shadow-none active:scale-95 transition-all text-sm">TUNAI</button>
-                 <button onClick={() => setActiveModal('qris')} disabled={cart.length === 0} className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-emerald-500/30 disabled:opacity-50 disabled:shadow-none active:scale-95 transition-all text-sm">QRIS</button>
+              <div className="grid grid-cols-2 gap-3">
+                 <button onClick={() => setActiveModal('cash')} disabled={cart.length === 0} className="w-full bg-neo-blue border-[3px] border-black text-black font-black py-4 shadow-neo disabled:opacity-50 disabled:shadow-none active:translate-y-1 active:translate-x-1 active:shadow-none transition-all text-sm uppercase">TUNAI</button>
+                 <button onClick={() => setActiveModal('qris')} disabled={cart.length === 0} className="w-full bg-neo-green border-[3px] border-black text-black font-black py-4 shadow-neo disabled:opacity-50 disabled:shadow-none active:translate-y-1 active:translate-x-1 active:shadow-none transition-all text-sm uppercase">QRIS</button>
               </div>
             </div>
           </>
@@ -154,15 +154,15 @@ export default function DashboardView() {
       </div>
 
        {activeModal === 'startshift' && (
-          <div className="fixed inset-0 bg-slate-900/50 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200">
-             <div className="bg-white w-full max-w-sm rounded-2xl shadow-xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
-                <div className="p-4 border-b bg-slate-50 flex items-center justify-between">
-                   <div className="font-bold">Mulai Shift Kasir</div>
-                   <button onClick={() => setActiveModal(null)} className="p-2 border rounded-lg bg-white shrink-0 font-bold text-sm hover:bg-slate-100">Batal</button>
+          <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4">
+             <div className="bg-white w-full max-w-sm border-[4px] border-black flex flex-col overflow-hidden shadow-neo-lg">
+                <div className="p-4 border-b-[4px] border-black bg-neo-yellow flex items-center justify-between">
+                   <div className="font-black uppercase">Mulai Shift Kasir</div>
+                   <button onClick={() => setActiveModal(null)} className="p-2 border-2 border-black bg-white shrink-0 font-bold text-sm hover:bg-neo-red hover:text-white shadow-neo">Batal</button>
                 </div>
-                <div className="p-6">
-                   <label className="block text-sm font-bold text-slate-600 mb-2">Modal Awal / Laci (Rp)</label>
-                   <input type="number" value={cashInput} onChange={e => setCashInput(e.target.value)} className="w-full text-2xl font-black border-2 rounded-xl p-4 text-center focus:outline-none focus:border-blue-500 mb-6" placeholder="0" />
+                <div className="p-6 bg-white">
+                   <label className="block text-sm font-black text-black mb-2 uppercase">Modal Awal / Laci (Rp)</label>
+                   <input type="number" value={cashInput} onChange={e => setCashInput(e.target.value)} className="w-full text-2xl font-black border-4 border-black p-4 text-center focus:outline-none focus:bg-neo-yellow/20 mb-6 bg-white" placeholder="0" />
                    <button onClick={() => {
                       try {
                           startShift(parseInt(cashInput, 10) || 0);
@@ -171,26 +171,26 @@ export default function DashboardView() {
                       } catch (e: any) {
                           setAlertMsg(e.message);
                       }
-                   }} className="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-blue-700">Buka Transaksi Kasir</button>
+                   }} className="w-full bg-neo-pink text-black border-[4px] border-black font-black py-4 shadow-neo hover:translate-y-1 hover:translate-x-1 hover:shadow-none transition-all uppercase">Buka Transaksi Kasir</button>
                 </div>
              </div>
           </div>
        )}
 
        {activeModal === 'endshift' && (
-          <div className="fixed inset-0 bg-slate-900/50 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200">
-             <div className="bg-white w-full max-w-sm rounded-2xl shadow-xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
-                <div className="p-4 border-b bg-slate-50 flex items-center justify-between">
-                   <div className="font-bold">Tutup Shift Kasir</div>
-                   <button onClick={() => setActiveModal(null)} className="p-2 border rounded-lg bg-white shrink-0 font-bold text-sm hover:bg-slate-100">Batal</button>
+          <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4">
+             <div className="bg-white w-full max-w-sm border-[4px] border-black shadow-neo-lg flex flex-col overflow-hidden">
+                <div className="p-4 border-b-[4px] border-black bg-neo-pink flex items-center justify-between">
+                   <div className="font-black uppercase">Tutup Shift Kasir</div>
+                   <button onClick={() => setActiveModal(null)} className="p-2 border-2 border-black bg-white shrink-0 font-bold text-sm hover:bg-neo-red hover:text-white shadow-neo">Batal</button>
                 </div>
                 <div className="p-6">
-                   <div className="bg-blue-50 p-4 rounded-xl mb-6">
-                      <div className="text-xs font-bold text-blue-600 mb-1">Diharapkan (Sistem)</div>
+                   <div className="bg-neo-blue p-4 border-[4px] border-black mb-6 shadow-neo">
+                      <div className="text-xs font-black text-black mb-1 uppercase">Diharapkan (Sistem)</div>
                       <div className="text-3xl font-black">{formatRupiah((activeShift?.startingCash || 0) + (activeShift?.totalSales || 0))}</div>
                    </div>
-                   <label className="block text-sm font-bold text-slate-600 mb-2">Uang Fisik Dihitung (Rp)</label>
-                   <input type="number" value={cashInput} onChange={e => setCashInput(e.target.value)} className="w-full text-2xl font-black border-2 rounded-xl p-4 text-center focus:outline-none focus:border-blue-500 mb-2" placeholder="0" />
+                   <label className="block text-sm font-black text-black mb-2 uppercase">Uang Fisik Dihitung (Rp)</label>
+                   <input type="number" value={cashInput} onChange={e => setCashInput(e.target.value)} className="w-full text-2xl font-black border-4 border-black p-4 text-center focus:outline-none focus:bg-neo-yellow/20 mb-2" placeholder="0" />
                    <button onClick={() => {
                       const expected = (activeShift?.startingCash || 0) + (activeShift?.totalSales || 0);
                       const actual = parseInt(cashInput, 10) || 0;
@@ -202,65 +202,65 @@ export default function DashboardView() {
                             setCashInput('');
                          }
                       });
-                   }} disabled={!cashInput} className="w-full bg-slate-900 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-slate-800 disabled:opacity-50 mt-4">Akhiri Shift Ini</button>
+                   }} disabled={!cashInput} className="w-full bg-black text-white font-black py-4 border-[4px] border-black shadow-neo hover:translate-y-1 hover:translate-x-1 hover:shadow-none transition-all disabled:opacity-50 mt-4 uppercase">Akhiri Shift Ini</button>
                 </div>
              </div>
           </div>
        )}
 
       {activeModal === 'cash' && (
-        <div className="fixed inset-0 bg-slate-900/50 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-md flex flex-col rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="p-4 bg-slate-50 border-b flex items-center justify-between shrink-0">
-               <div className="font-bold text-lg flex items-center gap-2">Pembayaran Tunai</div>
-               <button onClick={() => setActiveModal(null)} className="p-2 border rounded-lg bg-white shrink-0 font-bold text-sm hover:bg-slate-100">Batal</button>
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-md flex flex-col border-[4px] border-black shadow-neo-lg overflow-hidden">
+            <div className="p-4 bg-neo-blue border-b-[4px] border-black flex items-center justify-between shrink-0">
+               <div className="font-black text-lg flex items-center gap-2 uppercase">Pembayaran Tunai</div>
+               <button onClick={() => setActiveModal(null)} className="p-2 border-2 border-black bg-white shrink-0 font-bold text-sm hover:bg-neo-red hover:text-white shadow-neo">Batal</button>
             </div>
             <div className="p-6 flex flex-col gap-6">
-               <div className="flex justify-between items-center text-lg bg-slate-50 p-4 rounded-xl border">
-                 <span className="font-semibold text-slate-500">Total Tagihan</span>
-                 <span className="font-black text-slate-800">{formatRupiah(total)}</span>
+               <div className="flex justify-between items-center text-lg bg-neo-yellow p-4 border-[4px] border-black shadow-neo">
+                 <span className="font-black uppercase">Total Tagihan</span>
+                 <span className="font-black text-2xl">{formatRupiah(total)}</span>
                </div>
                <div>
-                  <label className="text-sm font-bold text-slate-600 mb-2 block">Uang Diterima (Rp)</label>
-                  <input type="number" value={cashInput} onChange={e => setCashInput(e.target.value)} autoFocus placeholder="0" className="w-full text-3xl font-black text-center py-4 border-2 rounded-xl focus:outline-none focus:border-blue-500 text-blue-600" />
+                  <label className="text-sm font-black mb-2 block uppercase">Uang Diterima (Rp)</label>
+                  <input type="number" value={cashInput} onChange={e => setCashInput(e.target.value)} autoFocus placeholder="0" className="w-full text-3xl font-black text-center py-4 border-[4px] border-black focus:outline-none focus:bg-neo-yellow/20" />
                </div>
                
-               <div className="grid grid-cols-2 gap-2">
-                  <button onClick={() => setCashInput(total.toString())} className="py-3 bg-blue-50 text-blue-700 font-bold rounded-xl border border-blue-100 hover:bg-blue-100 text-sm">Uang Pas</button>
+               <div className="grid grid-cols-2 gap-3">
+                  <button onClick={() => setCashInput(total.toString())} className="py-3 bg-neo-pink text-black font-black border-[3px] border-black hover:translate-y-[2px] transition-all shadow-neo hover:shadow-none text-sm uppercase">Uang Pas</button>
                   {[50000, 100000, 200000].map(v => (
-                     <button key={v} onClick={() => setCashInput(v.toString())} className="py-3 bg-slate-50 text-slate-700 font-bold rounded-xl border border-slate-200 hover:bg-slate-100 text-sm">{formatRupiah(v)}</button>
+                     <button key={v} onClick={() => setCashInput(v.toString())} className="py-3 bg-white text-black font-black border-[3px] border-black hover:bg-neo-yellow transition-all shadow-neo hover:translate-y-[2px] hover:shadow-none text-sm">{formatRupiah(v)}</button>
                   ))}
                </div>
 
                {parseInt(cashInput, 10) >= total && (
-                  <div className="flex justify-between items-center bg-green-50 text-green-700 p-4 rounded-xl border border-green-200">
-                    <span className="font-bold text-sm">Kembalian</span>
+                  <div className="flex justify-between items-center bg-neo-green text-black p-4 border-[4px] border-black shadow-neo">
+                    <span className="font-black text-sm uppercase">Kembalian</span>
                     <span className="font-black text-2xl">{formatRupiah(parseInt(cashInput, 10) - total)}</span>
                   </div>
                )}
-               <button onClick={handleCheckoutCash} disabled={!cashInput || parseInt(cashInput, 10) < total} className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold text-lg shadow-md disabled:opacity-50 active:scale-95 transition-transform">Konfirmasi Bayar</button>
+               <button onClick={handleCheckoutCash} disabled={!cashInput || parseInt(cashInput, 10) < total} className="w-full bg-black text-white py-4 font-black text-lg border-[4px] border-black shadow-neo disabled:opacity-50 active:translate-y-1 active:translate-x-1 active:shadow-none transition-transform uppercase">Konfirmasi Bayar</button>
             </div>
           </div>
         </div>
       )}
 
       {activeModal === 'qris' && (
-        <div className="fixed inset-0 bg-slate-900/50 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-           <div className="bg-white w-full max-w-sm flex flex-col rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
-             <div className="p-4 bg-slate-50 border-b flex items-center justify-between shrink-0">
-               <div className="font-bold text-lg flex items-center gap-2">Pembayaran QRIS</div>
-               <button onClick={() => setActiveModal(null)} className="p-2 border rounded-lg bg-white shrink-0 font-bold text-sm hover:bg-slate-100">Batal</button>
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+           <div className="bg-white w-full max-w-sm flex flex-col border-[4px] border-black shadow-neo-lg overflow-hidden">
+             <div className="p-4 bg-neo-green border-b-[4px] border-black flex items-center justify-between shrink-0">
+               <div className="font-black text-lg flex items-center gap-2 uppercase">Pembayaran QRIS</div>
+               <button onClick={() => setActiveModal(null)} className="p-2 border-[2px] border-black shadow-neo bg-white shrink-0 font-bold text-sm hover:bg-neo-red hover:text-white">Batal</button>
              </div>
              <div className="p-6 flex flex-col items-center gap-6 text-center">
-               <div className="w-48 h-48 bg-slate-100 border-2 border-dashed border-slate-300 rounded-2xl flex items-center justify-center flex-col gap-2">
-                  <div className="text-xs font-bold text-slate-400">TAMPILKAN QRIS APP<br/>DI LAYAR INI / EDC</div>
-                  <div className="font-black text-2xl text-slate-800">{formatRupiah(total)}</div>
+               <div className="w-48 h-48 bg-white border-[4px] border-black shadow-neo rounded-none flex items-center justify-center flex-col gap-2">
+                  <div className="text-xs font-black text-black uppercase">TAMPILKAN QRIS APP<br/>DI LAYAR INI / EDC</div>
+                  <div className="font-black text-2xl text-black">{formatRupiah(total)}</div>
                </div>
                <div className="w-full text-left">
-                  <label className="text-sm font-bold text-slate-600 mb-2 block">Nomor Referensi (Opsional / Wajib App)</label>
-                  <input type="text" value={qrisRef} autoFocus onChange={e => setQrisRef(e.target.value)} placeholder="Misal: 12345678" className="w-full py-3 px-4 border-2 rounded-xl focus:outline-none focus:border-green-500 font-mono text-center text-lg" />
+                  <label className="text-sm font-black text-black mb-2 block uppercase">Nomor Referensi (Opsional)</label>
+                  <input type="text" value={qrisRef} autoFocus onChange={e => setQrisRef(e.target.value)} placeholder="Misal: 12345678" className="w-full py-3 px-4 border-[4px] border-black focus:outline-none focus:bg-neo-yellow/20 font-mono text-center text-lg" />
                </div>
-               <button onClick={handleCheckoutQris} disabled={!qrisRef.trim()} className="w-full bg-green-500 text-white py-4 rounded-xl font-bold text-lg shadow-md disabled:opacity-50 active:scale-95 transition-transform">Konfirmasi QRIS</button>
+               <button onClick={handleCheckoutQris} disabled={!qrisRef.trim()} className="w-full bg-black text-white py-4 font-black border-[4px] border-black shadow-neo disabled:opacity-50 active:translate-y-1 active:translate-x-1 active:shadow-none transition-transform uppercase">Konfirmasi QRIS</button>
              </div>
           </div>
         </div>
@@ -271,38 +271,38 @@ export default function DashboardView() {
       )}
 
       {activeModal === 'history' && (
-        <div className="fixed inset-0 bg-slate-900/50 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-           <div className="bg-white w-full max-w-2xl h-[80vh] flex flex-col rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
-             <div className="p-4 bg-slate-900 text-white flex items-center justify-between shrink-0 shadow-md">
-               <div className="font-bold flex items-center gap-2"><Clock className="w-5 h-5"/>{activeShift ? 'Riwayat Shift Ini' : 'Riwayat Hari Ini'}</div>
-               <button onClick={() => setActiveModal(null)} className="p-2 border border-slate-600 rounded-lg hover:bg-slate-800 text-sm font-bold">Tutup</button>
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+           <div className="bg-white w-full max-w-2xl h-[80vh] flex flex-col border-[4px] border-black shadow-neo-lg overflow-hidden">
+             <div className="p-4 bg-neo-yellow border-b-[4px] border-black flex items-center justify-between shrink-0">
+               <div className="font-black flex items-center gap-2 uppercase"><Clock className="w-5 h-5"/>{activeShift ? 'Riwayat Shift Ini' : 'Riwayat Hari Ini'}</div>
+               <button onClick={() => setActiveModal(null)} className="p-2 border-[2px] border-black shadow-neo bg-white hover:bg-neo-red hover:text-white text-sm font-bold uppercase">Tutup</button>
              </div>
-             <div className="flex-1 overflow-y-auto p-4 bg-slate-50">
+             <div className="flex-1 overflow-y-auto p-4 bg-[#f0f0f0]">
                 {historyTransactions.map(tx => (
-                   <div key={tx.id} className={`bg-white p-4 rounded-xl border mb-3 shadow-sm ${tx.voided ? 'opacity-60 grayscale' : ''}`}>
-                      <div className="flex justify-between items-start mb-3 border-b pb-3">
+                   <div key={tx.id} className={`bg-white p-4 border-[3px] border-black mb-3 shadow-neo ${tx.voided ? 'opacity-50 grayscale' : ''}`}>
+                      <div className="flex justify-between items-start mb-3 border-b-2 border-black border-dashed pb-3">
                          <div>
-                            <div className="font-mono text-xs font-bold text-slate-500">#{tx.id.toUpperCase()}</div>
-                            <div className="text-sm font-medium">{new Date(tx.timestamp).toLocaleTimeString('id-ID')} - {new Date(tx.timestamp).toLocaleDateString('id-ID')}</div>
+                            <div className="font-black text-xs text-black border-2 border-black inline-block px-1 bg-neo-pink uppercase">#{tx.id.toUpperCase()}</div>
+                            <div className="text-sm font-bold mt-1">{new Date(tx.timestamp).toLocaleTimeString('id-ID')} - {new Date(tx.timestamp).toLocaleDateString('id-ID')}</div>
                          </div>
                          <div className="text-right">
-                            <div className={`font-black text-lg leading-none ${tx.voided ? 'line-through text-slate-400' : 'text-slate-800'}`}>{formatRupiah(tx.total)}</div>
-                            <div className={`text-xs font-bold px-2 py-0.5 rounded inline-block mt-1 ${tx.paymentMethod === 'QRIS' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'}`}>{tx.paymentMethod}</div>
-                            {tx.voided && <div className="text-xs font-bold px-2 py-0.5 rounded inline-block mt-1 ml-1 bg-red-100 text-red-600">VOID</div>}
+                            <div className={`font-black text-lg leading-none ${tx.voided ? 'line-through text-black' : 'text-black'}`}>{formatRupiah(tx.total)}</div>
+                            <div className={`text-xs font-black px-2 py-0.5 border-2 border-black shadow-sm inline-block mt-1 ${tx.paymentMethod === 'QRIS' ? 'bg-neo-green text-black' : 'bg-neo-blue text-black'}`}>{tx.paymentMethod}</div>
+                            {tx.voided && <div className="text-xs font-black px-2 py-0.5 border-2 border-black shadow-sm inline-block mt-1 ml-1 bg-neo-red text-white uppercase">VOID</div>}
                          </div>
                       </div>
-                      <div className="text-sm text-slate-600 mb-3 truncate">
+                      <div className="text-sm font-bold text-black mb-3 shrink-0">
                          {tx.items.map(i => `${i.qty}x ${i.product.name}`).join(', ')}
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex gap-3">
                          {(!tx.voided && (currentUser?.role === 'superadmin' || currentUser?.role === 'kasir' || currentUser?.role === 'bos')) && (
                             <button onClick={() => {
                                setConfirmData({
                                   message: 'Yakin membatalkan transaksi ini? Total sales akan divoid.',
                                   onConfirm: () => voidTransaction(tx.id)
                                });
-                            }} className="flex-1 text-center py-2 bg-amber-50 text-amber-700 hover:bg-amber-100 rounded-lg font-semibold text-xs border border-amber-100 transition-colors">
-                               Batalkan Transaksi
+                            }} className="flex-1 text-center py-2 bg-neo-yellow text-black border-[3px] border-black shadow-neo hover:translate-y-[2px] transition-all font-black text-xs uppercase">
+                               Batalkan
                             </button>
                          )}
                          {(currentUser?.role === 'superadmin' || currentUser?.role === 'bos') && (
@@ -311,15 +311,15 @@ export default function DashboardView() {
                                   message: 'Yakin MENGHAPUS secara permanen transaksi ini? Total sales akan dikurangi jika belum dibatalkan.',
                                   onConfirm: () => deleteTransaction(tx.id)
                                });
-                            }} className="flex-1 text-center py-2 bg-red-50 text-red-700 hover:bg-red-100 rounded-lg font-semibold text-xs border border-red-100 transition-colors">
-                               Hapus Permanen
+                            }} className="flex-1 text-center py-2 bg-neo-red text-white border-[3px] border-black shadow-neo hover:translate-y-[2px] transition-all font-black text-xs uppercase">
+                               Hapus
                             </button>
                          )}
                       </div>
                    </div>
                 ))}
                 {historyTransactions.length === 0 && (
-                   <div className="text-center py-12 text-slate-400 font-semibold">Belum ada transaksi di shift ini.</div>
+                   <div className="text-center py-12 text-black border-4 border-black bg-white shadow-neo font-black uppercase">Belum ada transaksi di shift ini.</div>
                 )}
              </div>
           </div>

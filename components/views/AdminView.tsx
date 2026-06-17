@@ -102,11 +102,11 @@ export default function AdminView() {
   };
 
   return (
-    <div className="p-6 h-full overflow-y-auto flex flex-col gap-6 w-full max-w-6xl mx-auto">
-       <div className="flex bg-white rounded-xl shadow-sm border p-1 shrink-0 w-max overflow-x-auto max-w-full">
-          <button onClick={() => setActiveTab('menu')} className={`px-6 py-2 rounded-lg font-bold text-sm flex items-center gap-2 whitespace-nowrap ${activeTab === 'menu' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:text-slate-800'}`}><Utensils className="w-4 h-4"/> Menu Makanan</button>
-          <button onClick={() => setActiveTab('users')} className={`px-6 py-2 rounded-lg font-bold text-sm flex items-center gap-2 whitespace-nowrap ${activeTab === 'users' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:text-slate-800'}`}><Users className="w-4 h-4"/> Pengurus & Kasir</button>
-          <button onClick={() => setActiveTab('danger')} className={`px-6 py-2 rounded-lg font-bold text-sm flex items-center gap-2 whitespace-nowrap ${activeTab === 'danger' ? 'bg-red-600 text-white shadow-md' : 'text-red-500 hover:bg-red-50'}`}><AlertTriangle className="w-4 h-4"/> Berbahaya</button>
+    <div className="p-6 h-full overflow-y-auto flex flex-col gap-6 w-full max-w-6xl mx-auto bg-transparent">
+       <div className="flex bg-white border-[4px] border-black shadow-neo p-1 shrink-0 w-max overflow-x-auto max-w-full">
+          <button onClick={() => setActiveTab('menu')} className={`px-6 py-2 font-black text-sm flex items-center gap-2 whitespace-nowrap uppercase border-[3px] border-transparent ${activeTab === 'menu' ? 'bg-neo-yellow border-black shadow-neo translate-y-[-2px]' : 'text-black hover:bg-neo-yellow/50'}`}><Utensils className="w-4 h-4"/> Menu Makanan</button>
+          <button onClick={() => setActiveTab('users')} className={`px-6 py-2 font-black text-sm flex items-center gap-2 whitespace-nowrap uppercase border-[3px] border-transparent ${activeTab === 'users' ? 'bg-neo-blue border-black shadow-neo translate-y-[-2px]' : 'text-black hover:bg-neo-blue/50'}`}><Users className="w-4 h-4"/> Pengurus & Kasir</button>
+          <button onClick={() => setActiveTab('danger')} className={`px-6 py-2 font-black text-sm flex items-center gap-2 whitespace-nowrap uppercase border-[3px] border-transparent ${activeTab === 'danger' ? 'bg-neo-red border-black shadow-neo translate-y-[-2px]' : 'text-black hover:bg-neo-red/50'}`}><AlertTriangle className="w-4 h-4"/> Berbahaya</button>
        </div>
 
        {activeTab === 'menu' && (
@@ -114,14 +114,14 @@ export default function AdminView() {
              <div className="flex items-center justify-between">
                 <div className="flex gap-2">
                    {CATEGORIES.map(c => (
-                      <button key={c} onClick={() => setActiveCategory(c)} className={`px-4 py-2 rounded-full font-bold text-sm border ${activeCategory === c ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600'}`}>{c}</button>
+                      <button key={c} onClick={() => setActiveCategory(c)} className={`px-4 py-2 font-black uppercase text-sm border-[3px] border-black transition-all ${activeCategory === c ? 'bg-black text-white shadow-neo translate-y-[-2px]' : 'bg-white text-black hover:bg-neo-yellow shadow-neo'}`}>{c}</button>
                    ))}
                 </div>
                 <div className="flex gap-2">
-                   <button onClick={handleSeedMenu} className="bg-amber-100 text-amber-700 hover:bg-amber-200 px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-1 shadow-sm">
+                   <button onClick={handleSeedMenu} className="bg-neo-yellow text-black border-[3px] border-black shadow-neo hover:translate-y-[2px] transition-all hover:shadow-none px-4 py-2 font-black uppercase text-sm flex items-center gap-1">
                       <Save className="w-4 h-4" /> Seed Resep PDF
                    </button>
-                   <button onClick={() => setIsAdding(true)} className="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-1 shadow-sm hover:bg-blue-700">
+                   <button onClick={() => setIsAdding(true)} className="bg-neo-blue text-black border-[3px] border-black shadow-neo hover:translate-y-[2px] transition-all hover:shadow-none px-4 py-2 font-black uppercase text-sm flex items-center gap-1">
                       <Plus className="w-4 h-4" /> Tambah Baru
                    </button>
                 </div>
@@ -129,16 +129,16 @@ export default function AdminView() {
 
              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {filteredMenu.map(item => (
-                   <div key={item.id} className="bg-white p-4 rounded-xl shadow-sm border flex flex-col gap-2 relative group">
-                      <div className="font-bold text-slate-800 flex items-start justify-between">
+                   <div key={item.id} className="bg-white p-4 border-[4px] border-black shadow-neo flex flex-col gap-2 relative group hover:bg-neo-yellow transition-all">
+                      <div className="font-black text-black flex items-start justify-between uppercase">
                          {item.name}
-                         {item.isBundle && <span className="bg-purple-100 text-purple-700 text-[10px] px-1.5 py-0.5 rounded uppercase font-black tracking-wider">Bundle</span>}
+                         {item.isBundle && <span className="bg-neo-pink text-black text-[10px] px-1.5 py-0.5 border-2 border-black uppercase font-black tracking-wider shadow-sm">Bundle</span>}
                       </div>
-                      <div className="text-blue-600 font-black">{formatRupiah(item.price)}</div>
-                      {item.recipe && <div className="text-xs text-slate-500 line-clamp-2 mt-1">{item.recipe}</div>}
-                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 bg-white p-1 rounded-lg border shadow-sm">
-                         <button onClick={() => setEditingMenu(item)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded"><Edit2 className="w-4 h-4" /></button>
-                         <button onClick={() => handleMenuDelete(item.id)} className="p-1.5 text-red-600 hover:bg-red-50 rounded"><Trash2 className="w-4 h-4" /></button>
+                      <div className="bg-neo-green inline-block w-max px-2 py-0.5 border-2 border-black font-black text-black">{formatRupiah(item.price)}</div>
+                      {item.recipe && <div className="text-xs font-bold text-black line-clamp-2 mt-1">{item.recipe}</div>}
+                      <div className="absolute top-[-10px] right-[-10px] opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 bg-white p-1 border-[3px] border-black shadow-neo">
+                         <button onClick={() => setEditingMenu(item)} className="p-1 border-[2px] border-black bg-neo-blue text-black hover:bg-blue-400"><Edit2 className="w-4 h-4" /></button>
+                         <button onClick={() => handleMenuDelete(item.id)} className="p-1 border-[2px] border-black bg-neo-red text-white hover:bg-red-400"><Trash2 className="w-4 h-4" /></button>
                       </div>
                    </div>
                 ))}
@@ -149,32 +149,32 @@ export default function AdminView() {
        {activeTab === 'users' && (
           <div className="flex flex-col gap-6">
              <div className="flex items-center justify-end">
-                <button onClick={() => {setIsAddingUser(true); setEditingUser(null);}} className="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-1 shadow-sm hover:bg-blue-700">
+                <button onClick={() => {setIsAddingUser(true); setEditingUser(null);}} className="bg-neo-blue text-black border-[3px] border-black shadow-neo px-4 py-2 font-black uppercase text-sm flex items-center gap-1 hover:translate-y-[2px] transition-all">
                    <Plus className="w-4 h-4" /> Pengguna Baru
                 </button>
              </div>
 
-             <div className="overflow-x-auto bg-white rounded-xl shadow-sm border">
-                <table className="w-full text-left text-sm">
-                   <thead className="bg-slate-50 border-b">
+             <div className="overflow-x-auto bg-white border-[4px] border-black shadow-neo">
+                <table className="w-full text-left text-sm border-collapse">
+                   <thead className="bg-neo-yellow border-b-[4px] border-black">
                       <tr>
-                         <th className="p-4 font-semibold text-slate-600">Username</th>
-                         <th className="p-4 font-semibold text-slate-600">Nama Lengkap</th>
-                         <th className="p-4 font-semibold text-slate-600">Peran Role</th>
-                         <th className="p-4 font-semibold text-slate-600 text-right">Aksi</th>
+                         <th className="p-4 font-black text-black uppercase border-r-[4px] border-black">Username</th>
+                         <th className="p-4 font-black text-black uppercase border-r-[4px] border-black">Nama Lengkap</th>
+                         <th className="p-4 font-black text-black uppercase border-r-[4px] border-black">Peran Role</th>
+                         <th className="p-4 font-black text-black uppercase text-right">Aksi</th>
                       </tr>
                    </thead>
-                   <tbody className="divide-y">
+                   <tbody className="divide-y-[3px] divide-black">
                       {users.map(u => (
-                          <tr key={u.username} className="hover:bg-slate-50">
-                             <td className="p-4 font-mono font-medium text-slate-800">@{u.username}</td>
-                             <td className="p-4 text-slate-600">{u.name}</td>
-                             <td className="p-4">
-                                <span className={cn("px-2 py-1 uppercase text-[10px] font-bold rounded-md", u.role === 'bos' || u.role === 'superadmin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700')}>{u.role}</span>
+                          <tr key={u.username} className="hover:bg-neo-yellow/20">
+                             <td className="p-4 font-mono font-bold text-black border-r-[4px] border-black">@{u.username}</td>
+                             <td className="p-4 font-bold text-black border-r-[4px] border-black uppercase">{u.name}</td>
+                             <td className="p-4 border-r-[4px] border-black">
+                                <span className={cn("px-2 py-1 uppercase text-[10px] font-black border-2 border-black", u.role === 'bos' || u.role === 'superadmin' ? 'bg-neo-pink text-black' : 'bg-neo-green text-black')}>{u.role}</span>
                              </td>
                              <td className="p-4 flex gap-2 justify-end">
-                                <button onClick={() => setEditingUser(u)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg border border-transparent hover:border-blue-100"><Edit2 className="w-4 h-4" /></button>
-                                <button onClick={() => handleUserDelete(u.username)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg border border-transparent hover:border-red-100"><Trash2 className="w-4 h-4" /></button>
+                                <button onClick={() => setEditingUser(u)} className="p-2 border-[2px] border-black shadow-neo bg-white hover:bg-neo-blue text-black transition-colors"><Edit2 className="w-4 h-4" /></button>
+                                <button onClick={() => handleUserDelete(u.username)} className="p-2 border-[2px] border-black shadow-neo bg-white hover:bg-neo-red text-black transition-colors"><Trash2 className="w-4 h-4" /></button>
                              </td>
                           </tr>
                       ))}
@@ -186,29 +186,29 @@ export default function AdminView() {
 
        {activeTab === 'danger' && (
           <div className="flex flex-col gap-6 w-full max-w-2xl">
-             <div className="bg-white p-6 rounded-xl shadow-sm border border-red-200">
-                <div className="flex items-center gap-3 text-red-600 mb-2">
+             <div className="bg-white border-[4px] border-black shadow-neo-lg p-6">
+                <div className="flex items-center gap-3 text-black bg-neo-red border-[4px] border-black p-2 shadow-neo w-max mb-4">
                    <AlertTriangle className="w-6 h-6" />
-                   <h2 className="font-bold text-lg">Hapus Permanen Data</h2>
+                   <h2 className="font-black text-lg uppercase">Hapus Permanen Data</h2>
                 </div>
-                <p className="text-slate-500 text-sm mb-6">Peringatan: Tindakan ini tidak dapat dibatalkan. Pastikan Anda sudah membuat cadangan atau laporan dari data yang akan dihapus.</p>
+                <p className="text-black font-bold text-sm mb-6 border-l-4 border-black pl-3 py-1">Peringatan: Tindakan ini tidak dapat dibatalkan. Pastikan Anda sudah membuat cadangan atau laporan dari data yang akan dihapus.</p>
                 
                 <div className="space-y-4">
-                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-slate-50 border rounded-xl gap-4">
+                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-white border-[4px] border-black shadow-none gap-4">
                       <div>
-                         <h3 className="font-bold text-slate-800">Hapus Semua Riwayat Transaksi</h3>
-                         <p className="text-xs text-slate-500 mt-1">Menghapus seluruh nota penjualan. (Tidak menghapus data shift)</p>
+                         <h3 className="font-black text-black uppercase">Hapus Semua Riwayat Transaksi</h3>
+                         <p className="text-xs font-bold mt-1">Menghapus seluruh nota penjualan. (Tidak menghapus data shift)</p>
                       </div>
-                      <button onClick={() => setConfirmData({ message: 'PERINGATAN: Seluruh riwayat transaksi (nota) akan DIHAPUS PERMANEN. Lanjutkan?', onConfirm: () => purgeData('TRANSACTIONS') })} className="bg-red-100 text-red-700 hover:bg-red-200 px-4 py-2 rounded-lg font-bold text-xs whitespace-nowrap">
+                      <button onClick={() => setConfirmData({ message: 'PERINGATAN: Seluruh riwayat transaksi (nota) akan DIHAPUS PERMANEN. Lanjutkan?', onConfirm: () => purgeData('TRANSACTIONS') })} className="bg-neo-red text-white border-[3px] border-black shadow-neo hover:translate-y-[2px] transition-all px-4 py-2 font-black text-xs uppercase whitespace-nowrap">
                          Hapus Transaksi
                       </button>
                    </div>
-                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-slate-50 border rounded-xl gap-4">
+                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-white border-[4px] border-black shadow-none gap-4">
                       <div>
-                         <h3 className="font-bold text-slate-800">Hapus Semua Riwayat Shift (Sesi)</h3>
-                         <p className="text-xs text-slate-500 mt-1">Menghapus riwayat penutupan shift dan saldo kasir.</p>
+                         <h3 className="font-black text-black uppercase">Hapus Semua Riwayat Shift (Sesi)</h3>
+                         <p className="text-xs font-bold mt-1">Menghapus riwayat penutupan shift dan saldo kasir.</p>
                       </div>
-                      <button onClick={() => setConfirmData({ message: 'PERINGATAN: Seluruh riwayat shift dan sesi kasir akan DIHAPUS PERMANEN. Lanjutkan?', onConfirm: () => purgeData('SHIFTS') })} className="bg-red-100 text-red-700 hover:bg-red-200 px-4 py-2 rounded-lg font-bold text-xs whitespace-nowrap">
+                      <button onClick={() => setConfirmData({ message: 'PERINGATAN: Seluruh riwayat shift dan sesi kasir akan DIHAPUS PERMANEN. Lanjutkan?', onConfirm: () => purgeData('SHIFTS') })} className="bg-neo-red text-white border-[3px] border-black shadow-neo hover:translate-y-[2px] transition-all px-4 py-2 font-black text-xs uppercase whitespace-nowrap">
                          Hapus Shift
                       </button>
                    </div>
@@ -227,34 +227,34 @@ export default function AdminView() {
        )}
 
        {(isAddingUser || editingUser) && (
-          <div className="fixed inset-0 bg-slate-900/50 z-50 flex flex-col items-center justify-center p-4">
-             <div className="bg-white w-full max-w-sm rounded-2xl shadow-xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
-                <div className="p-4 border-b bg-slate-50 flex items-center justify-between">
-                   <div className="font-bold">{editingUser ? 'Edit Pengguna' : 'Tambah Pengguna'}</div>
-                   <button onClick={() => {setIsAddingUser(false); setEditingUser(null);}}><X className="w-5 h-5 text-slate-500 hover:text-slate-800" /></button>
+          <div className="fixed inset-0 bg-black/60 z-50 flex flex-col items-center justify-center p-4">
+             <div className="bg-white border-[4px] border-black shadow-neo-lg w-full max-w-sm flex flex-col overflow-hidden">
+                <div className="p-4 border-b-[4px] border-black bg-neo-yellow flex items-center justify-between">
+                   <div className="font-black uppercase">{editingUser ? 'Edit Pengguna' : 'Tambah Pengguna'}</div>
+                   <button onClick={() => {setIsAddingUser(false); setEditingUser(null);}} className="bg-white border-2 border-black p-1 shadow-neo hover:bg-neo-red hover:text-white"><X className="w-5 h-5"/></button>
                 </div>
                 <form onSubmit={handleUserSave} className="p-4 space-y-4">
                    <div>
-                      <label className="block text-xs font-bold text-slate-500 mb-1">Username</label>
-                      <input name="username" required readOnly={!!editingUser && !isAddingUser} defaultValue={editingUser?.username} className="w-full border rounded-lg p-2.5 focus:border-blue-500 outline-none read-only:bg-slate-100" />
+                      <label className="block text-xs font-black uppercase mb-1">Username</label>
+                      <input name="username" required readOnly={!!editingUser && !isAddingUser} defaultValue={editingUser?.username} className="w-full border-[3px] border-black font-bold p-2.5 focus:outline-none focus:bg-neo-yellow/20 read-only:bg-slate-200" />
                    </div>
                    <div>
-                      <label className="block text-xs font-bold text-slate-500 mb-1">Nama Lengkap</label>
-                      <input name="name" required defaultValue={editingUser?.name} className="w-full border rounded-lg p-2.5 focus:border-blue-500 outline-none" />
+                      <label className="block text-xs font-black uppercase mb-1">Nama Lengkap</label>
+                      <input name="name" required defaultValue={editingUser?.name} className="w-full border-[3px] border-black font-bold p-2.5 focus:outline-none focus:bg-neo-yellow/20" />
                    </div>
                    <div>
-                      <label className="block text-xs font-bold text-slate-500 mb-1">Role</label>
-                      <select name="role" required defaultValue={editingUser?.role || 'kasir'} className="w-full border rounded-lg p-2.5 focus:border-blue-500 outline-none bg-white">
+                      <label className="block text-xs font-black uppercase mb-1">Role</label>
+                      <select name="role" required defaultValue={editingUser?.role || 'kasir'} className="w-full border-[3px] border-black font-bold p-2.5 focus:outline-none bg-white">
                          <option value="kasir">Kasir</option>
                          <option value="superadmin">Super Admin</option>
                          <option value="bos">Bos (Laporan)</option>
                       </select>
                    </div>
                    <div>
-                      <label className="block text-xs font-bold text-slate-500 mb-1">PIN (Opsional, kosong = tanpa PIN)</label>
-                      <input name="pin" type="text" maxLength={6} defaultValue={editingUser?.pin} placeholder="Cth: 1234" className="w-full border rounded-lg p-2.5 focus:border-blue-500 outline-none font-mono tracking-widest text-lg text-center" />
+                      <label className="block text-xs font-black uppercase mb-1">PIN (Opsional)</label>
+                      <input name="pin" type="text" maxLength={6} defaultValue={editingUser?.pin} placeholder="Cth: 1234" className="w-full border-[3px] border-black font-mono font-black tracking-widest text-lg p-2.5 focus:outline-none focus:bg-neo-yellow/20 text-center" />
                    </div>
-                   <button type="submit" className="w-full bg-blue-600 text-white font-bold py-3 rounded-xl mt-4 hover:bg-blue-700 flex justify-center items-center gap-2"><Save className="w-4 h-4" /> Simpan</button>
+                   <button type="submit" className="w-full bg-neo-green text-black border-[4px] border-black shadow-neo font-black uppercase py-3 mt-4 hover:translate-y-[2px] transition-all flex justify-center items-center gap-2"><Save className="w-4 h-4" /> Simpan</button>
                 </form>
              </div>
           </div>

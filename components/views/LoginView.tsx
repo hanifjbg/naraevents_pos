@@ -38,15 +38,15 @@ export default function LoginView() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-sm bg-white rounded-2xl shadow-2xl p-8 animate-in zoom-in-95 duration-200 min-h-[400px] flex flex-col">
+    <div className="min-h-screen bg-[#ff90e8] bg-[url('https://www.transparenttextures.com/patterns/gridme.png')] flex items-center justify-center p-4">
+      <div className="w-full max-w-sm bg-white border-[4px] border-black shadow-neo-lg p-8 min-h-[400px] flex flex-col">
         <div className="flex flex-col items-center mb-8 shrink-0">
-           <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-blue-500/30">
-              <Store className="w-8 h-8 text-white" />
+           <div className="w-16 h-16 bg-neo-yellow border-[4px] border-black flex items-center justify-center mb-4 shadow-neo">
+              <Store className="w-8 h-8 text-black" />
            </div>
-           <h1 className="text-2xl font-black text-slate-800 tracking-tight">Nyaman POS</h1>
-           <p className="text-sm font-medium text-slate-500">
-               {selectedUser ? `Masukkan PIN untuk ${selectedUser.name}` : 'Pilih akun untuk masuk'}
+           <h1 className="text-3xl font-black text-black tracking-tighter uppercase border-b-[4px] border-black pb-1 mb-2">Nyaman POS</h1>
+           <p className="text-sm font-black text-black uppercase bg-neo-blue border-[2px] border-black px-2 py-1 shadow-sm text-center">
+               {selectedUser ? `PIN: ${selectedUser.name}` : 'Pilih Akun'}
            </p>
         </div>
         
@@ -54,19 +54,19 @@ export default function LoginView() {
             {!selectedUser ? (
                 <div className="space-y-3 overflow-y-auto max-h-[300px] pr-2 custom-scrollbar">
                    {allUsers.map(u => (
-                      <button key={u.username} onClick={() => handleUserClick(u)} className="w-full text-left p-4 rounded-xl border-2 border-slate-100 hover:border-blue-500 hover:bg-blue-50 transition-all flex items-center gap-3 group">
-                         <div className="w-10 h-10 bg-slate-100 group-hover:bg-blue-200 rounded-full flex items-center justify-center text-slate-400 group-hover:text-blue-600 shrink-0">
+                      <button key={u.username} onClick={() => handleUserClick(u)} className="w-full text-left p-4 border-[3px] border-black bg-white hover:bg-neo-yellow hover:translate-x-[-2px] hover:translate-y-[-2px] shadow-neo transition-all flex items-center gap-3 group">
+                         <div className="w-10 h-10 border-2 border-black bg-neo-green flex items-center justify-center text-black shrink-0 shadow-sm">
                             <UserCircle2 className="w-6 h-6" />
                          </div>
                          <div>
-                            <div className="font-bold text-slate-800">{u.name}</div>
-                            <div className="text-[10px] uppercase font-black tracking-widest text-slate-400">{u.role}</div>
+                            <div className="font-black text-black uppercase">{u.name}</div>
+                            <div className="text-[10px] uppercase font-bold tracking-widest text-black bg-white border border-black inline-block px-1 mt-1">{u.role}</div>
                          </div>
                       </button>
                    ))}
                 </div>
             ) : (
-                <form onSubmit={handlePinSubmit} className="space-y-6 animate-in slide-in-from-right-4 duration-200">
+                <form onSubmit={handlePinSubmit} className="space-y-6">
                    <div>
                       <input 
                          type="password" 
@@ -74,15 +74,15 @@ export default function LoginView() {
                          onChange={e => {setPin(e.target.value); setError('');}}
                          maxLength={6}
                          autoFocus
-                         className="w-full text-center text-3xl tracking-[1em] font-mono border-b-2 border-slate-300 focus:border-blue-600 outline-none pb-2 bg-transparent"
+                         className="w-full text-center text-3xl tracking-[0.5em] font-mono border-[4px] border-black py-4 focus:outline-none focus:bg-neo-yellow/20"
                          placeholder="••••"
                       />
                    </div>
-                   {error && <div className="text-red-500 text-sm font-bold text-center bg-red-50 p-2 rounded-lg">{error}</div>}
-                   <button type="submit" disabled={!pin} className="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-blue-700 disabled:opacity-50 transition-all">
+                   {error && <div className="text-white text-sm font-black text-center bg-red-600 border-[3px] border-black p-2 shadow-neo uppercase">{error}</div>}
+                   <button type="submit" disabled={!pin} className="w-full bg-neo-green border-[4px] border-black text-black font-black uppercase tracking-widest py-4 shadow-neo hover:translate-y-[2px] disabled:opacity-50 transition-all hover:shadow-none">
                       Masuk
                    </button>
-                   <button type="button" onClick={() => setSelectedUser(null)} className="w-full flex justify-center items-center gap-1 py-3 text-slate-500 font-bold hover:text-slate-800 text-sm">
+                   <button type="button" onClick={() => setSelectedUser(null)} className="w-full flex justify-center items-center gap-1 py-3 text-black font-black uppercase text-sm border-2 border-transparent hover:border-black transition-all">
                       <ArrowLeft className="w-4 h-4" /> Batal
                    </button>
                 </form>
