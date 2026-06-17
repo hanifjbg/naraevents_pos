@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { usePos, User, Product, CATEGORIES } from '@/lib/store';
 import { formatRupiah } from '@/lib/utils';
-import { Plus, Edit2, Trash2, X, Save, Users, Utensils } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Save, Users, Utensils, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ConfirmDialog } from './Dialogs';
-
 import { MenuForm } from './MenuForm';
 
 const SEED_MENU: Partial<Product>[] = [
@@ -26,8 +25,8 @@ const SEED_MENU: Partial<Product>[] = [
 ];
 
 export default function AdminView() {
-  const { menu, setMenu, users, updateUser, deleteUser, addUser } = usePos();
-  const [activeTab, setActiveTab] = useState<'menu' | 'users'>('menu');
+  const { menu, setMenu, users, updateUser, deleteUser, addUser, purgeData } = usePos();
+  const [activeTab, setActiveTab] = useState<'menu' | 'users' | 'danger'>('menu');
   const [activeCategory, setActiveCategory] = useState(CATEGORIES[0]);
   const [editingMenu, setEditingMenu] = useState<Product | null>(null);
   const [isAdding, setIsAdding] = useState(false);
@@ -104,9 +103,10 @@ export default function AdminView() {
 
   return (
     <div className="p-6 h-full overflow-y-auto flex flex-col gap-6 w-full max-w-6xl mx-auto">
-       <div className="flex bg-white rounded-xl shadow-sm border p-1 shrink-0 w-max">
-          <button onClick={() => setActiveTab('menu')} className={`px-6 py-2 rounded-lg font-bold text-sm flex items-center gap-2 ${activeTab === 'menu' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:text-slate-800'}`}><Utensils className="w-4 h-4"/> Menu Makanan</button>
-          <button onClick={() => setActiveTab('users')} className={`px-6 py-2 rounded-lg font-bold text-sm flex items-center gap-2 ${activeTab === 'users' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:text-slate-800'}`}><Users className="w-4 h-4"/> Pengurus & Kasir</button>
+       <div className="flex bg-white rounded-xl shadow-sm border p-1 shrink-0 w-max overflow-x-auto max-w-full">
+          <button onClick={() => setActiveTab('menu')} className={`px-6 py-2 rounded-lg font-bold text-sm flex items-center gap-2 whitespace-nowrap ${activeTab === 'menu' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:text-slate-800'}`}><Utensils className="w-4 h-4"/> Menu Makanan</button>
+          <button onClick={() => setActiveTab('users')} className={`px-6 py-2 rounded-lg font-bold text-sm flex items-center gap-2 whitespace-nowrap ${activeTab === 'users' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:text-slate-800'}`}><Users className="w-4 h-4"/> Pengurus & Kasir</button>
+          <button onClick={() => setActiveTab('danger')} className={`px-6 py-2 rounded-lg font-bold text-sm flex items-center gap-2 whitespace-nowrap ${activeTab === 'danger' ? 'bg-red-600 text-white shadow-md' : 'text-red-500 hover:bg-red-50'}`}><AlertTriangle className="w-4 h-4"/> Berbahaya</button>
        </div>
 
        {activeTab === 'menu' && (
@@ -180,6 +180,39 @@ export default function AdminView() {
                       ))}
                    </tbody>
                 </table>
+             </div>
+          </div>
+       )}
+
+       {activeTab === 'danger' && (
+          <div className="flex flex-col gap-6 w-full max-w-2xl">
+             <div className="bg-white p-6 rounded-xl shadow-sm border border-red-200">
+                <div className="flex items-center gap-3 text-red-600 mb-2">
+                   <AlertTriangle className="w-6 h-6" />
+                   <h2 className="font-bold text-lg">Hapus Permanen Data</h2>
+                </div>
+                <p className="text-slate-500 text-sm mb-6">Peringatan: Tindakan ini tidak dapat dibatalkan. Pastikan Anda sudah membuat cadangan atau laporan dari data yang akan dihapus.</p>
+                
+                <div className="space-y-4">
+                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-slate-50 border rounded-xl gap-4">
+                      <div>
+                         <h3 className="font-bold text-slate-800">Hapus Semua Riwayat Transaksi</h3>
+                         <p className="text-xs text-slate-500 mt-1">Menghapus seluruh nota penjualan. (Tidak menghapus data shift)</p>
+                      </div>
+                      <button onClick={() => setConfirmData({ message: 'PERINGATAN: Seluruh riwayat transaksi (nota) akan DIHAPUS PERMANEN. Lanjutkan?', onConfirm: () => purgeData('TRANSACTIONS') })} className="bg-red-100 text-red-700 hover:bg-red-200 px-4 py-2 rounded-lg font-bold text-xs whitespace-nowrap">
+                         Hapus Transaksi
+                      </button>
+                   </div>
+                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-slate-50 border rounded-xl gap-4">
+                      <div>
+                         <h3 className="font-bold text-slate-800">Hapus Semua Riwayat Shift (Sesi)</h3>
+                         <p className="text-xs text-slate-500 mt-1">Menghapus riwayat penutupan shift dan saldo kasir.</p>
+                      </div>
+                      <button onClick={() => setConfirmData({ message: 'PERINGATAN: Seluruh riwayat shift dan sesi kasir akan DIHAPUS PERMANEN. Lanjutkan?', onConfirm: () => purgeData('SHIFTS') })} className="bg-red-100 text-red-700 hover:bg-red-200 px-4 py-2 rounded-lg font-bold text-xs whitespace-nowrap">
+                         Hapus Shift
+                      </button>
+                   </div>
+                </div>
              </div>
           </div>
        )}

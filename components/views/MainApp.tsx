@@ -15,7 +15,7 @@ export default function MainApp() {
 
   return (
     <div className="flex flex-col h-screen bg-slate-100 overflow-hidden text-slate-800">
-      <header className="bg-slate-900 text-white shrink-0 p-3 shadow-md flex items-center justify-between z-10">
+      <header className="bg-slate-900 text-white shrink-0 p-3 shadow-md flex items-center justify-between z-10 print:hidden">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 font-black text-xl tracking-tight text-white/90">
              <Store className="w-5 h-5 text-blue-400" /> NYAMAN

@@ -72,6 +72,7 @@ interface PosState {
   addUser: (user: User) => void;
   updateUser: (user: User) => void;
   deleteUser: (username: string) => void;
+  purgeData: (type: 'TRANSACTIONS' | 'SHIFTS') => Promise<void>;
 }
 
 let unsubUsers: any;
@@ -277,5 +278,13 @@ export const usePos = create<PosState>((set, get) => {
   },
   deleteUser: (username) => {
     if (db) deleteDoc(doc(db, 'users', username));
+  },
+  purgeData: async (type) => {
+      if (!db) return;
+      const colName = type === 'TRANSACTIONS' ? 'transactions' : 'shifts';
+      const snap = await getDocs(collection(db, colName));
+      const batch = writeBatch(db);
+      snap.docs.forEach(d => batch.delete(d.ref));
+      await batch.commit();
   }
 }})

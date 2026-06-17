@@ -52,6 +52,11 @@ export default function ReportsView() {
   const totalRevenue = filteredTransactions.reduce((s,t) => s + (!t.voided ? t.total : 0), 0);
   const totalTrx = filteredTransactions.length;
   const totalQtyItem = filteredTransactions.reduce((s,t) => s + (!t.voided ? t.items.reduce((sum, item) => sum + item.qty, 0) : 0), 0);
+  const totalCash = filteredTransactions.reduce((s,t) => s + (!t.voided && t.paymentMethod === 'CASH' ? t.total : 0), 0);
+  const totalQris = filteredTransactions.reduce((s,t) => s + (!t.voided && t.paymentMethod === 'QRIS' ? t.total : 0), 0);
+  
+  const { activeShift } = usePos();
+  const currentCashInHand = activeShift ? activeShift.startingCash + filteredTransactions.reduce((s, t) => s + (!t.voided && t.paymentMethod === 'CASH' && t.shiftId === activeShift.id ? t.total : 0), 0) : 0;
 
   const chartDataMap = filteredTransactions.reduce((acc: any, t) => {
      if (t.voided) return acc;
@@ -67,9 +72,9 @@ export default function ReportsView() {
   })).slice(0, 14);
 
   return (
-    <div className="p-6 h-full overflow-y-auto w-full max-w-7xl mx-auto">
+    <div className="p-6 h-full overflow-y-auto w-full max-w-7xl mx-auto print:p-0 print:overflow-visible">
       
-      <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 mb-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 mb-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 print:hidden">
          <div>
             <label className="text-xs font-semibold text-slate-500 mb-1 block">Dari Tanggal</label>
             <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} className="w-full border rounded-lg p-2 text-sm" />
@@ -117,19 +122,40 @@ export default function ReportsView() {
          </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-         <div className="bg-white p-6 justify-center rounded-2xl shadow-sm border border-slate-100 flex flex-col">
-            <h3 className="text-sm font-semibold text-slate-500 mb-1">Total Pendapatan Terfilter</h3>
-            <div className="text-4xl font-bold text-green-600">{formatRupiah(totalRevenue)}</div>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 mt-6">
+          <h2 className="text-xl font-bold">Ringkasan Laporan</h2>
+          <button onClick={() => window.print()} className="bg-slate-800 text-white px-4 py-2 rounded-lg font-bold text-sm shadow hover:bg-slate-700 flex gap-2 items-center print:hidden">
+              <FileText className="w-4 h-4" /> Cetak PDF (Laporan)
+          </button>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
+         <div onClick={() => setFilterStatus('success')} className="bg-white p-4 justify-center rounded-2xl shadow-sm border border-slate-100 flex flex-col cursor-pointer hover:border-green-300 hover:shadow-md transition-all">
+            <h3 className="text-xs font-semibold text-slate-500 mb-1">Total Pendapatan</h3>
+            <div className="text-xl font-bold text-green-600">{formatRupiah(totalRevenue)}</div>
          </div>
-         <div className="bg-white p-6 justify-center rounded-2xl shadow-sm border border-slate-100 flex flex-col">
-            <h3 className="text-sm font-semibold text-slate-500 mb-1">Jumlah Transaksi</h3>
-            <div className="text-4xl font-bold text-blue-600">{totalTrx}</div>
+         <div onClick={() => setFilterMethod('CASH')} className="bg-white p-4 justify-center rounded-2xl shadow-sm border border-slate-100 flex flex-col cursor-pointer hover:border-emerald-300 hover:shadow-md transition-all">
+            <h3 className="text-xs font-semibold text-slate-500 mb-1">Tunai (CASH)</h3>
+            <div className="text-xl font-bold text-emerald-600">{formatRupiah(totalCash)}</div>
          </div>
-         <div className="bg-white p-6 justify-center rounded-2xl shadow-sm border border-slate-100 flex flex-col">
-            <h3 className="text-sm font-semibold text-slate-500 mb-1">Total Item Terjual</h3>
-            <div className="text-4xl font-bold text-purple-600">{totalQtyItem}</div>
+         <div onClick={() => setFilterMethod('QRIS')} className="bg-white p-4 justify-center rounded-2xl shadow-sm border border-slate-100 flex flex-col cursor-pointer hover:border-indigo-300 hover:shadow-md transition-all">
+            <h3 className="text-xs font-semibold text-slate-500 mb-1">Non-Tunai (QRIS)</h3>
+            <div className="text-xl font-bold text-indigo-600">{formatRupiah(totalQris)}</div>
          </div>
+         <div className="bg-white p-4 justify-center rounded-2xl shadow-sm border border-slate-100 flex flex-col">
+            <h3 className="text-xs font-semibold text-slate-500 mb-1">Jumlah Transaksi</h3>
+            <div className="text-xl font-bold text-blue-600">{totalTrx} x</div>
+         </div>
+         <div className="bg-white p-4 justify-center rounded-2xl shadow-sm border border-slate-100 flex flex-col">
+            <h3 className="text-xs font-semibold text-slate-500 mb-1">Item Terjual</h3>
+            <div className="text-xl font-bold text-purple-600">{totalQtyItem} item</div>
+         </div>
+         {activeShift && (
+             <div className="bg-blue-50 p-4 justify-center rounded-2xl shadow-sm border border-blue-200 flex flex-col">
+                <h3 className="text-xs font-semibold text-blue-600 mb-1">Cash In Hand (Sesi Aktif)</h3>
+                <div className="text-xl font-bold text-blue-800">{formatRupiah(currentCashInHand)}</div>
+             </div>
+         )}
       </div>
 
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 mb-8 h-80">
@@ -175,7 +201,7 @@ export default function ReportsView() {
                        </td>
                        <td className="p-4 text-right font-bold text-slate-800">
                            <span className={t.voided ? 'line-through text-slate-400' : ''}>{formatRupiah(t.total)}</span>
-                           <button onClick={() => setSelectedTx(t)} className="ml-3 px-2 py-1 bg-slate-100 text-slate-700 text-xs rounded hover:bg-slate-200">Nota</button>
+                           <button onClick={() => setSelectedTx(t)} className="ml-3 px-2 py-1 bg-slate-100 text-slate-700 text-xs rounded hover:bg-slate-200 print:hidden">Nota</button>
                        </td>
                     </tr>
                 ))}
