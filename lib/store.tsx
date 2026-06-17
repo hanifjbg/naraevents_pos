@@ -93,8 +93,8 @@ export function PosProvider({ children }: { children: React.ReactNode }) {
               INITIAL_MENU.forEach(m => batch.set(doc(db, 'menu', m.id), m));
               await batch.commit();
            }
-       } catch (e) {
-           console.error("Firebase seeding failed", e);
+       } catch (e: any) {
+           console.error("Firebase seeding failed", e?.message || e);
        }
     };
     seedDb();
@@ -107,24 +107,24 @@ export function PosProvider({ children }: { children: React.ReactNode }) {
     try {
         unsubUsers = onSnapshot(collection(db, 'users'), (snap) => {
            setUsers(snap.docs.map(d => d.data() as User));
-        });
+        }, (error) => console.error("Firebase users snap error", error.message));
 
         unsubMenu = onSnapshot(collection(db, 'menu'), (snap) => {
            const m = snap.docs.map(d => d.data() as Product);
            if (m.length > 0) setMenuState(m);
-        });
+        }, (error) => console.error("Firebase menu snap error", error.message));
 
         unsubTrans = onSnapshot(collection(db, 'transactions'), (snap) => {
            const t = snap.docs.map(d => d.data() as Transaction).sort((a,b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
            setTransactions(t);
-        });
+        }, (error) => console.error("Firebase trans snap error", error.message));
 
         unsubShifts = onSnapshot(collection(db, 'shifts'), (snap) => {
            const s = snap.docs.map(d => d.data() as Shift).sort((a,b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
            setShifts(s);
-        });
-    } catch(e) {
-        console.error("Firebase subscription failed", e);
+        }, (error) => console.error("Firebase shifts snap error", error.message));
+    } catch(e: any) {
+        console.error("Firebase subscription failed", e?.message || e);
     }
 
     return () => {
