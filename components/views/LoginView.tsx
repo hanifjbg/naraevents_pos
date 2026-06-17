@@ -29,7 +29,8 @@ export default function LoginView() {
     const correctPin = isDefault ? '1234' : storedPin.trim();
 
     if (pin.trim() === correctPin || pin.trim() === '1234') {
-       setCurrentUser(selectedUser);
+       const userToSet = selectedUser ? JSON.parse(JSON.stringify(selectedUser)) : null;
+       setTimeout(() => setCurrentUser(userToSet), 10);
     } else {
        setError('PIN Salah!');
        setPin('');

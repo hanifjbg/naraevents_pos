@@ -22,9 +22,7 @@ export default function MainApp() {
           </div>
           <div className="hidden md:flex bg-slate-800 rounded-lg p-1 gap-1">
              <button onClick={() => setActiveTab('pos')} className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${activeTab === 'pos' ? 'bg-blue-500 text-white shadow-sm' : 'text-slate-400 hover:text-white hover:bg-slate-700'}`}>Kasir</button>
-             {['superadmin', 'bos'].includes(currentUser.role) && (
-                <button onClick={() => setActiveTab('reports')} className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${activeTab === 'reports' ? 'bg-blue-500 text-white shadow-sm' : 'text-slate-400 hover:text-white hover:bg-slate-700'}`}>Laporan</button>
-             )}
+             <button onClick={() => setActiveTab('reports')} className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${activeTab === 'reports' ? 'bg-blue-500 text-white shadow-sm' : 'text-slate-400 hover:text-white hover:bg-slate-700'}`}>Laporan</button>
              {['superadmin', 'bos'].includes(currentUser.role) && (
                 <button onClick={() => setActiveTab('admin')} className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${activeTab === 'admin' ? 'bg-blue-500 text-white shadow-sm' : 'text-slate-400 hover:text-white hover:bg-slate-700'}`}>Admin</button>
              )}
@@ -43,9 +41,7 @@ export default function MainApp() {
 
       <div className="md:hidden bg-slate-800 p-2 flex gap-2 overflow-x-auto shrink-0 shadow-inner z-0">
           <button onClick={() => setActiveTab('pos')} className={`flex-1 py-2 px-3 rounded-md text-xs font-bold transition-all flex items-center justify-center gap-2 ${activeTab === 'pos' ? 'bg-blue-500 text-white' : 'text-slate-400 bg-slate-900/50'}`}><Calculator className="w-4 h-4"/> Kasir</button>
-          {['superadmin', 'bos'].includes(currentUser.role) && (
-             <button onClick={() => setActiveTab('reports')} className={`flex-1 py-2 px-3 rounded-md text-xs font-bold transition-all flex items-center justify-center gap-2 ${activeTab === 'reports' ? 'bg-blue-500 text-white' : 'text-slate-400 bg-slate-900/50'}`}><BarChart3 className="w-4 h-4"/> Laporan</button>
-          )}
+          <button onClick={() => setActiveTab('reports')} className={`flex-1 py-2 px-3 rounded-md text-xs font-bold transition-all flex items-center justify-center gap-2 ${activeTab === 'reports' ? 'bg-blue-500 text-white' : 'text-slate-400 bg-slate-900/50'}`}><BarChart3 className="w-4 h-4"/> Laporan</button>
           {['superadmin', 'bos'].includes(currentUser.role) && (
              <button onClick={() => setActiveTab('admin')} className={`flex-1 py-2 px-3 rounded-md text-xs font-bold transition-all flex items-center justify-center gap-2 ${activeTab === 'admin' ? 'bg-blue-500 text-white' : 'text-slate-400 bg-slate-900/50'}`}><Settings className="w-4 h-4"/> Admin</button>
           )}

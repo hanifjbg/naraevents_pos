@@ -29,15 +29,19 @@ export function MenuForm({ menuList, initialData, onSave, onClose }: { menuList:
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       const fd = new FormData(e.currentTarget);
-      const newM: Product = {
+      const newM: any = {
          id: initialData ? initialData.id : Math.random().toString(36).substring(2, 10),
          name: fd.get('name') as string,
          price: parseInt(fd.get('price') as string, 10),
          category: fd.get('category') as string,
-         recipe: fd.get('recipe') as string,
-         isBundle,
-         bundleItems: isBundle ? bundleItems : undefined,
+         isBundle
       };
+      
+      const recipeStr = fd.get('recipe') as string;
+      if (recipeStr) newM.recipe = recipeStr;
+      
+      if (isBundle) newM.bundleItems = bundleItems;
+
       onSave(newM);
   };
 

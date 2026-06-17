@@ -65,12 +65,13 @@ export default function AdminView() {
      e.preventDefault();
      const fd = new FormData(e.currentTarget);
      const isEditing = !!editingUser && !isAddingUser;
-     const newU: User = {
+     const newU: any = {
         username: fd.get('username') as string,
         name: (fd.get('name') as string) || fd.get('username') as string,
         role: fd.get('role') as any,
-        pin: fd.get('pin') as string || undefined,
      };
+     const pinStr = fd.get('pin') as string;
+     if (pinStr) newU.pin = pinStr;
      
      if (isEditing) {
         updateUser(newU);

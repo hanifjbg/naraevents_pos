@@ -107,7 +107,7 @@ export default function DashboardView() {
           <>
             <div className="p-4 border-b bg-slate-50 flex items-center justify-between shrink-0">
                <div className="font-bold text-lg flex items-center gap-2"><ShoppingCart className="w-5 h-5"/> Pesanan</div>
-               {cart.length > 0 && <button onClick={clearCart} className="text-sm font-bold text-red-500 hover:text-red-700 p-1">Hapus Semua</button>}
+               {cart.length > 0 && <button onClick={() => clearCart()} className="text-sm font-bold text-red-500 hover:text-red-700 p-1">Hapus Semua</button>}
                {activeShift && (
                   <button onClick={() => setActiveModal('endshift')} className="text-xs bg-red-100 text-red-600 font-bold px-3 py-1.5 rounded-md hover:bg-red-200">Akhiri Shift</button>
                )}

@@ -28,9 +28,12 @@ export default function ReportsView() {
      if (dateTo) {
         data = data.filter(t => new Date(t.timestamp) <= new Date(dateTo + 'T23:59:59'));
      }
-     if (filterCashier) {
-        data = data.filter(t => t.cashier === filterCashier);
+     
+     const actualCashierFilter = currentUser?.role === 'kasir' ? currentUser.username : filterCashier;
+     if (actualCashierFilter) {
+        data = data.filter(t => t.cashier === actualCashierFilter);
      }
+     
      if (filterMethod) {
         data = data.filter(t => t.paymentMethod === filterMethod);
      }
@@ -44,7 +47,7 @@ export default function ReportsView() {
      }
 
      return data;
-  }, [transactions, dateFrom, dateTo, filterCashier, filterMethod, filterStatus, filterItem]);
+  }, [transactions, dateFrom, dateTo, filterCashier, filterMethod, filterStatus, filterItem, currentUser]);
 
   const totalRevenue = filteredTransactions.reduce((s,t) => s + (!t.voided ? t.total : 0), 0);
   const totalTrx = filteredTransactions.length;
@@ -77,9 +80,16 @@ export default function ReportsView() {
          </div>
          <div>
             <label className="text-xs font-semibold text-slate-500 mb-1 block">Kasir</label>
-            <select value={filterCashier} onChange={e => setFilterCashier(e.target.value)} className="w-full border rounded-lg p-2 text-sm bg-white">
-               <option value="">Semua</option>
-               {users.map(u => <option key={u.username} value={u.username}>{u.name} (@{u.username})</option>)}
+            <select 
+               value={currentUser?.role === 'kasir' ? currentUser.username : filterCashier} 
+               onChange={e => setFilterCashier(e.target.value)} 
+               disabled={currentUser?.role === 'kasir'}
+               className={`w-full border rounded-lg p-2 text-sm ${currentUser?.role === 'kasir' ? 'bg-slate-100' : 'bg-white'}`}
+            >
+               {currentUser?.role !== 'kasir' && <option value="">Semua</option>}
+               {users.filter(u => currentUser?.role !== 'kasir' || u.username === currentUser.username).map(u => (
+                  <option key={u.username} value={u.username}>{u.name} (@{u.username})</option>
+               ))}
             </select>
          </div>
          <div>
