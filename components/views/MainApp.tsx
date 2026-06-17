@@ -10,7 +10,21 @@ import { Store, LogOut, Settings, BarChart3, Calculator } from 'lucide-react';
 export default function MainApp() {
   const { currentUser, setCurrentUser, activeShift } = usePos();
   const [activeTab, setActiveTab] = useState<'pos' | 'reports' | 'admin'>('pos');
+  const [isReady, setIsReady] = useState(false);
 
+  React.useEffect(() => {
+     try {
+        const cached = localStorage.getItem('pos_current_user');
+        if (cached) {
+           setCurrentUser(JSON.parse(cached));
+        }
+     } catch (e) {
+        // ignore
+     }
+     setIsReady(true);
+  }, [setCurrentUser]);
+
+  if (!isReady) return null;
   if (!currentUser) return <LoginView />;
 
   return (

@@ -6,6 +6,16 @@ import { formatRupiah } from '@/lib/utils';
 export function MenuForm({ menuList, initialData, onSave, onClose }: { menuList: Product[], initialData: Product | null, onSave: (p: Product) => void, onClose: () => void }) {
   const [isBundle, setIsBundle] = useState(initialData?.isBundle || false);
   const [bundleItems, setBundleItems] = useState<{productId: string, qty: number}[]>(initialData?.bundleItems || []);
+  const [priceInput, setPriceInput] = useState(initialData?.price ? initialData.price.toLocaleString('id-ID') : '');
+
+  const handlePriceInput = (val: string) => {
+    const numeric = val.replace(/\D/g, '');
+    if (!numeric) {
+      setPriceInput('');
+    } else {
+      setPriceInput(parseInt(numeric, 10).toLocaleString('id-ID'));
+    }
+  };
   const [activeCategory, setActiveCategory] = useState(initialData?.category || CATEGORIES[0]);
 
   const addBundleItem = (id: string) => {
@@ -32,7 +42,7 @@ export function MenuForm({ menuList, initialData, onSave, onClose }: { menuList:
       const newM: any = {
          id: initialData ? initialData.id : Math.random().toString(36).substring(2, 10),
          name: fd.get('name') as string,
-         price: parseInt(fd.get('price') as string, 10),
+         price: parseInt(priceInput.replace(/\D/g, ''), 10) || 0,
          category: fd.get('category') as string,
          isBundle
       };
@@ -60,7 +70,7 @@ export function MenuForm({ menuList, initialData, onSave, onClose }: { menuList:
                  </div>
                  <div>
                     <label className="block text-xs font-black uppercase mb-1">Harga (Rp)</label>
-                    <input name="price" type="number" required defaultValue={initialData?.price} className="w-full border-[3px] border-black font-bold p-2.5 focus:outline-none focus:bg-neo-yellow/20" />
+                    <input name="price" type="text" inputMode="numeric" required value={priceInput} onChange={e => handlePriceInput(e.target.value)} className="w-full border-[3px] border-black font-bold p-2.5 focus:outline-none focus:bg-neo-yellow/20" />
                  </div>
                  <div>
                     <label className="block text-xs font-black uppercase mb-1">Kategori</label>

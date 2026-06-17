@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { usePos, CATEGORIES, Transaction } from '@/lib/store';
+import React, { useState, useEffect } from 'react';
+import { usePos, CATEGORIES, Transaction, Product } from '@/lib/store';
 import { formatRupiah } from '@/lib/utils';
-import { ShoppingCart, Plus, Minus, Trash2, Clock, CheckCircle2, Search } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, Trash2, Clock, CheckCircle2, Search, ArrowUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { AlertDialog, ConfirmDialog } from './Dialogs';
 import ReceiptModal from './ReceiptModal';
@@ -16,20 +16,46 @@ export default function DashboardView() {
   const [lastTx, setLastTx] = useState<Transaction | null>(null);
   const [alertMsg, setAlertMsg] = useState('');
   const [confirmData, setConfirmData] = useState<{message: string, onConfirm: () => void} | null>(null);
+  
+  const [sortConfig, setSortConfig] = useState<'name_asc' | 'name_desc' | 'price_asc' | 'price_desc'>(() => {
+    if (typeof window !== 'undefined') {
+       return (localStorage.getItem('pos_menu_sort') as any) || 'name_asc';
+    }
+    return 'name_asc';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('pos_menu_sort', sortConfig);
+  }, [sortConfig]);
+
+  const handleCashInput = (val: string) => {
+    const numeric = val.replace(/\D/g, '');
+    if (!numeric) {
+      setCashInput('');
+    } else {
+      setCashInput(parseInt(numeric, 10).toLocaleString('id-ID'));
+    }
+  };
 
   const filteredMenu = menu.filter(item => {
     if (searchQuery) return item.name.toLowerCase().includes(searchQuery.toLowerCase());
     return item.category === activeCategory;
+  }).sort((a, b) => {
+    if (sortConfig === 'name_asc') return a.name.localeCompare(b.name);
+    if (sortConfig === 'name_desc') return b.name.localeCompare(a.name);
+    if (sortConfig === 'price_asc') return a.price - b.price;
+    if (sortConfig === 'price_desc') return b.price - a.price;
+    return 0;
   });
   const total = cart.reduce((sum, item) => sum + item.product.price * item.qty, 0);
+  const parsedCashInput = parseInt(cashInput.replace(/\D/g, '') || '0', 10);
 
   const handleCheckoutCash = () => {
-    const cash = parseInt(cashInput, 10) || 0;
-    if (cash < total) {
+    if (parsedCashInput < total) {
       setAlertMsg('Uang kurang!');
       return;
     }
-    const t = checkout('CASH', cash);
+    const t = checkout('CASH', parsedCashInput);
     if (t) {
        setLastTx(t);
        setActiveModal('receipt');
@@ -67,9 +93,27 @@ export default function DashboardView() {
               <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-black" />
               <input type="text" placeholder="Cari menu..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full pl-10 pr-4 py-2 border-[3px] border-black font-bold text-black focus:outline-none focus:bg-neo-yellow/20" />
             </div>
-            <button onClick={() => setActiveModal('history')} className="px-3 py-2 bg-neo-pink border-[3px] border-black text-black font-bold text-sm shadow-neo hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-none active:scale-95 shrink-0 flex items-center transition-all">
-               <Clock className="w-4 h-4 mr-1" /> Riwayat
+            <div className="relative shrink-0 hidden sm:block border-[3px] border-black bg-white">
+                <select value={sortConfig} onChange={e => setSortConfig(e.target.value as any)} className="appearance-none pl-3 pr-8 py-2 font-black uppercase text-xs focus:outline-none cursor-pointer bg-transparent relative z-10 w-full h-full">
+                   <option value="name_asc">A - Z</option>
+                   <option value="name_desc">Z - A</option>
+                   <option value="price_desc">Termahal</option>
+                   <option value="price_asc">Termurah</option>
+                </select>
+                <ArrowUpDown className="w-4 h-4 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none z-0" />
+            </div>
+            <button onClick={() => setActiveModal('history')} className="px-3 py-2 bg-neo-pink border-[3px] border-black text-black font-bold text-sm shadow-neo hover:translate-y-[2px] transition-all">
+               <Clock className="w-4 h-4 md:mr-1 inline" /> <span className="hidden md:inline">Riwayat</span>
             </button>
+          </div>
+          <div className="flex sm:hidden w-full border-[3px] border-black bg-white relative">
+             <select value={sortConfig} onChange={e => setSortConfig(e.target.value as any)} className="appearance-none px-3 py-2 font-black uppercase text-xs focus:outline-none cursor-pointer bg-transparent relative z-10 w-full h-full">
+                <option value="name_asc">Urutkan: A - Z</option>
+                <option value="name_desc">Urutkan: Z - A</option>
+                <option value="price_desc">Urutkan: Termahal</option>
+                <option value="price_asc">Urutkan: Termurah</option>
+             </select>
+             <ArrowUpDown className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none z-0" />
           </div>
           {!searchQuery && (
             <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-2">
@@ -115,20 +159,20 @@ export default function DashboardView() {
             
             <div className="flex-1 overflow-y-auto p-2 hide-scrollbar bg-white">
               {cart.map(item => (
-                <div key={item.product.id} className="bg-white p-3 border-[2px] border-black shadow-sm mb-2 flex flex-col gap-2 relative group hover:bg-neo-yellow transition-colors">
-                   <div className="flex justify-between items-start pr-8">
-                     <div className="font-black text-sm text-black uppercase leading-tight">{item.product.name}</div>
-                     <div className="font-black text-sm shrink-0 ml-2 bg-white px-1 border-2 border-black">{formatRupiah(item.product.price * item.qty)}</div>
+                <div key={item.product.id} className="bg-white p-4 border-[3px] border-black shadow-sm mb-3 flex flex-col gap-3 relative group hover:bg-neo-yellow transition-colors">
+                   <div className="flex justify-between items-start pr-10">
+                     <div className="font-black text-lg sm:text-xl text-black uppercase leading-tight">{item.product.name}</div>
+                     <div className="font-black text-xl shrink-0 ml-2 bg-white px-2 py-1 border-2 border-black whitespace-nowrap">{formatRupiah(item.product.price * item.qty)}</div>
                    </div>
-                   <div className="flex items-center gap-3">
-                     <div className="flex items-center border-[2px] border-black bg-white shadow-sm overflow-hidden text-sm">
-                        <button onClick={() => decreaseFromCart(item.product.id)} className="px-3 py-1 hover:bg-neo-pink text-black font-black transition-colors border-r-2 border-black"><Minus className="w-3 h-3" /></button>
-                        <span className="font-black w-8 text-center">{item.qty}</span>
-                        <button onClick={() => addToCart(item.product)} className="px-3 py-1 hover:bg-neo-green text-black font-black transition-colors border-l-2 border-black"><Plus className="w-3 h-3" /></button>
+                   <div className="flex items-center gap-4 mt-1">
+                     <div className="flex items-center border-[2px] border-black bg-white shadow-sm overflow-hidden">
+                        <button onClick={() => decreaseFromCart(item.product.id)} className="px-5 py-3 hover:bg-neo-pink text-black font-black transition-colors border-r-2 border-black"><Minus className="w-5 h-5" /></button>
+                        <span className="font-black w-14 text-center text-xl">{item.qty}</span>
+                        <button onClick={() => addToCart(item.product)} className="px-5 py-3 hover:bg-neo-green text-black font-black transition-colors border-l-2 border-black"><Plus className="w-5 h-5" /></button>
                      </div>
-                     <div className="text-xs text-black font-bold border-b-2 border-black border-dashed">@ {formatRupiah(item.product.price)}</div>
+                     <div className="text-base text-black font-black border-b-2 border-black border-dashed pb-1">@ {formatRupiah(item.product.price)}</div>
                    </div>
-                   <button onClick={() => removeFromCart(item.product.id)} className="absolute top-3 right-3 text-white bg-black hover:bg-neo-red p-1 opacity-0 group-hover:opacity-100 transition-opacity border-2 border-black shadow-sm"><Trash2 className="w-4 h-4" /></button>
+                   <button onClick={() => removeFromCart(item.product.id)} className="absolute top-4 right-4 text-white bg-black hover:bg-neo-red p-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity border-2 border-black shadow-sm"><Trash2 className="w-5 h-5" /></button>
                 </div>
               ))}
               {cart.length === 0 && (
@@ -162,10 +206,10 @@ export default function DashboardView() {
                 </div>
                 <div className="p-6 bg-white">
                    <label className="block text-sm font-black text-black mb-2 uppercase">Modal Awal / Laci (Rp)</label>
-                   <input type="number" value={cashInput} onChange={e => setCashInput(e.target.value)} className="w-full text-2xl font-black border-4 border-black p-4 text-center focus:outline-none focus:bg-neo-yellow/20 mb-6 bg-white" placeholder="0" />
+                   <input type="text" inputMode="numeric" value={cashInput} onChange={e => handleCashInput(e.target.value)} className="w-full text-3xl font-black border-4 border-black p-4 text-center focus:outline-none focus:bg-neo-yellow/20 mb-6 bg-white" placeholder="0" />
                    <button onClick={() => {
                       try {
-                          startShift(parseInt(cashInput, 10) || 0);
+                          startShift(parsedCashInput);
                           setActiveModal(null);
                           setCashInput('');
                       } catch (e: any) {
@@ -190,14 +234,14 @@ export default function DashboardView() {
                       <div className="text-3xl font-black">{formatRupiah((activeShift?.startingCash || 0) + (activeShift?.totalSales || 0))}</div>
                    </div>
                    <label className="block text-sm font-black text-black mb-2 uppercase">Uang Fisik Dihitung (Rp)</label>
-                   <input type="number" value={cashInput} onChange={e => setCashInput(e.target.value)} className="w-full text-2xl font-black border-4 border-black p-4 text-center focus:outline-none focus:bg-neo-yellow/20 mb-2" placeholder="0" />
+                   <input type="text" inputMode="numeric" value={cashInput} onChange={e => handleCashInput(e.target.value)} className="w-full text-3xl font-black border-4 border-black p-4 text-center focus:outline-none focus:bg-neo-yellow/20 mb-2" placeholder="0" />
                    <button onClick={() => {
                       const expected = (activeShift?.startingCash || 0) + (activeShift?.totalSales || 0);
-                      const actual = parseInt(cashInput, 10) || 0;
+                      
                       setConfirmData({
-                         message: `Tutup shift? Selisih uang kasir adalah ${formatRupiah(actual - expected)}. Lanjutkan?`,
+                         message: `Tutup shift? Selisih uang kasir adalah ${formatRupiah(parsedCashInput - expected)}. Lanjutkan?`,
                          onConfirm: () => {
-                            endShift(actual, expected);
+                            endShift(parsedCashInput, expected);
                             setActiveModal(null);
                             setCashInput('');
                          }
@@ -222,23 +266,23 @@ export default function DashboardView() {
                </div>
                <div>
                   <label className="text-sm font-black mb-2 block uppercase">Uang Diterima (Rp)</label>
-                  <input type="number" value={cashInput} onChange={e => setCashInput(e.target.value)} autoFocus placeholder="0" className="w-full text-3xl font-black text-center py-4 border-[4px] border-black focus:outline-none focus:bg-neo-yellow/20" />
+                  <input type="text" inputMode="numeric" value={cashInput} onChange={e => handleCashInput(e.target.value)} autoFocus placeholder="0" className="w-full text-4xl font-black text-center py-4 border-[4px] border-black focus:outline-none focus:bg-neo-yellow/20" />
                </div>
                
-               <div className="grid grid-cols-2 gap-3">
-                  <button onClick={() => setCashInput(total.toString())} className="py-3 bg-neo-pink text-black font-black border-[3px] border-black hover:translate-y-[2px] transition-all shadow-neo hover:shadow-none text-sm uppercase">Uang Pas</button>
-                  {[50000, 100000, 200000].map(v => (
-                     <button key={v} onClick={() => setCashInput(v.toString())} className="py-3 bg-white text-black font-black border-[3px] border-black hover:bg-neo-yellow transition-all shadow-neo hover:translate-y-[2px] hover:shadow-none text-sm">{formatRupiah(v)}</button>
+               <div className="grid grid-cols-3 gap-3">
+                  <button onClick={() => setCashInput(total.toLocaleString('id-ID'))} className="py-3 bg-neo-pink text-black font-black border-[3px] border-black hover:translate-y-[2px] transition-all shadow-neo hover:shadow-none text-sm uppercase">Uang Pas</button>
+                  {[15000, 20000, 50000, 100000, 200000].map(v => (
+                     <button key={v} onClick={() => setCashInput(v.toLocaleString('id-ID'))} className="py-3 bg-white text-black font-black border-[3px] border-black hover:bg-neo-yellow transition-all shadow-neo hover:translate-y-[2px] hover:shadow-none text-sm">{formatRupiah(v)}</button>
                   ))}
                </div>
 
-               {parseInt(cashInput, 10) >= total && (
-                  <div className="flex justify-between items-center bg-neo-green text-black p-4 border-[4px] border-black shadow-neo">
+               {parsedCashInput >= total && (
+                  <div className="flex justify-between items-center bg-neo-green text-black p-4 border-[4px] border-black shadow-neo mt-2">
                     <span className="font-black text-sm uppercase">Kembalian</span>
-                    <span className="font-black text-2xl">{formatRupiah(parseInt(cashInput, 10) - total)}</span>
+                    <span className="font-black text-2xl">{formatRupiah(parsedCashInput - total)}</span>
                   </div>
                )}
-               <button onClick={handleCheckoutCash} disabled={!cashInput || parseInt(cashInput, 10) < total} className="w-full bg-black text-white py-4 font-black text-lg border-[4px] border-black shadow-neo disabled:opacity-50 active:translate-y-1 active:translate-x-1 active:shadow-none transition-transform uppercase">Konfirmasi Bayar</button>
+               <button onClick={handleCheckoutCash} disabled={!cashInput || parsedCashInput < total} className="w-full bg-black text-white py-4 font-black text-lg border-[4px] border-black shadow-neo disabled:opacity-50 active:translate-y-1 active:translate-x-1 active:shadow-none transition-transform uppercase mt-4">Konfirmasi Bayar</button>
             </div>
           </div>
         </div>

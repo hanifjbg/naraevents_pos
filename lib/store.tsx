@@ -119,6 +119,13 @@ export const usePos = create<PosState>((set, get) => {
 
   setCurrentUser: (user) => {
      set({ currentUser: user });
+     if (typeof window !== 'undefined') {
+        if (user) {
+           localStorage.setItem('pos_current_user', JSON.stringify(user));
+        } else {
+           localStorage.removeItem('pos_current_user');
+        }
+     }
      if (user) {
         const active = get().shifts.find(s => s.cashier === user.username && s.status === 'active');
         set({ activeShift: active || null });
