@@ -5,6 +5,7 @@ import { CATEGORIES, Product, User } from '@/lib/constants';
 import { formatRupiah, generateId } from '@/lib/utils';
 import { Plus, Edit2, Trash2, X, Save, Users, Utensils } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ConfirmDialog } from './Dialogs';
 
 export default function AdminView() {
   const { menu, setMenu, users, updateUser, deleteUser, addUser } = usePos();
@@ -15,13 +16,15 @@ export default function AdminView() {
   const [isAdding, setIsAdding] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [isAddingUser, setIsAddingUser] = useState(false);
+  const [confirmData, setConfirmData] = useState<{message: string, onConfirm: () => void} | null>(null);
 
   const filteredMenu = menu.filter(item => item.category === activeCategory);
 
   const handleMenuDelete = (id: string) => {
-     if (confirm('Yakin ingin menghapus menu ini?')) {
-        setMenu(menu.filter(m => m.id !== id));
-     }
+     setConfirmData({
+        message: 'Yakin ingin menghapus menu ini?',
+        onConfirm: () => setMenu(menu.filter(m => m.id !== id))
+     });
   };
 
   const handleMenuSave = (e: React.FormEvent<HTMLFormElement>) => {
@@ -41,9 +44,10 @@ export default function AdminView() {
   };
 
   const handleUserDelete = (username: string) => {
-     if (confirm('Yakin ingin menghapus pengguna ini?')) {
-        deleteUser(username);
-     }
+     setConfirmData({
+        message: 'Yakin ingin menghapus pengguna ini?',
+        onConfirm: () => deleteUser(username)
+     });
   };
 
   const handleUserSave = (e: React.FormEvent<HTMLFormElement>) => {
@@ -179,6 +183,8 @@ export default function AdminView() {
              </div>
           </div>
        )}
+
+      {confirmData && <ConfirmDialog message={confirmData.message} onConfirm={confirmData.onConfirm} onClose={() => setConfirmData(null)} />}
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { CATEGORIES, Product } from '@/lib/constants';
 import { formatRupiah } from '@/lib/utils';
 import { ShoppingCart, Plus, Minus, Trash2, Clock, CheckCircle2, ChevronLeft, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { AlertDialog, ConfirmDialog } from './Dialogs';
 
 export default function DashboardView() {
   const { currentUser, menu, cart, addToCart, decreaseFromCart, removeFromCart, clearCart, checkout, transactions, voidTransaction, activeShift } = usePos();
@@ -13,6 +14,8 @@ export default function DashboardView() {
   const [cashInput, setCashInput] = useState('');
   const [qrisRef, setQrisRef] = useState('');
   const [lastTx, setLastTx] = useState<Transaction | null>(null);
+  const [alertMsg, setAlertMsg] = useState('');
+  const [confirmData, setConfirmData] = useState<{message: string, onConfirm: () => void} | null>(null);
 
   const filteredMenu = menu.filter(item => item.category === activeCategory);
   const total = cart.reduce((sum, item) => sum + item.product.price * item.qty, 0);
@@ -20,7 +23,7 @@ export default function DashboardView() {
   const handleCheckoutCash = () => {
     const cash = parseInt(cashInput, 10) || 0;
     if (cash < total) {
-      alert('Uang kurang!');
+      setAlertMsg('Uang kurang!');
       return;
     }
     const t = checkout('CASH', cash);
@@ -33,7 +36,7 @@ export default function DashboardView() {
 
   const handleCheckoutQris = () => {
     if (!qrisRef.trim()) {
-      alert('Masukkan nomor referensi QRIS!');
+      setAlertMsg('Masukkan nomor referensi QRIS!');
       return;
     }
     const t = checkout('QRIS', undefined, qrisRef);
@@ -258,9 +261,10 @@ export default function DashboardView() {
                       </div>
                       {(!tx.voided && (currentUser?.role === 'superadmin' || currentUser?.role === 'kasir' || currentUser?.role === 'bos')) && (
                          <button onClick={() => {
-                            if (confirm('Yakin membatalkan transaksi ini? Total sales akan divoid.')) {
-                               voidTransaction(tx.id);
-                            }
+                            setConfirmData({
+                               message: 'Yakin membatalkan transaksi ini? Total sales akan divoid.',
+                               onConfirm: () => voidTransaction(tx.id)
+                            });
                          }} className="w-full text-center py-2 bg-red-50 text-red-700 hover:bg-red-100 rounded-lg font-semibold text-xs border border-red-100 transition-colors">
                             Batalkan Transaksi
                          </button>
@@ -277,6 +281,9 @@ export default function DashboardView() {
           </div>
         )}
       </div>
+      
+      {alertMsg && <AlertDialog message={alertMsg} onClose={() => setAlertMsg('')} />}
+      {confirmData && <ConfirmDialog message={confirmData.message} onConfirm={confirmData.onConfirm} onClose={() => setConfirmData(null)} />}
     </div>
   );
 }

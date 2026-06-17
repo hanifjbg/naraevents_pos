@@ -3,10 +3,12 @@ import { useState } from 'react';
 import { usePos } from '@/lib/store';
 import { formatRupiah } from '@/lib/utils';
 import { PlayCircle, StopCircle } from 'lucide-react';
+import { ConfirmDialog } from './Dialogs';
 
 export default function ShiftView() {
   const { activeShift, startShift, endShift, transactions } = usePos();
   const [cashInput, setCashInput] = useState('');
+  const [confirmData, setConfirmData] = useState<{message: string, onConfirm: () => void} | null>(null);
 
   if (!activeShift) {
     return (
@@ -76,9 +78,10 @@ export default function ShiftView() {
         <button 
            onClick={() => {
              const act = parseInt(cashInput.replace(/[^0-9]/g, ''), 10) || 0;
-             if (confirm(`Tutup shift? Selisih uang adalah ${formatRupiah(act - expectedCash)}`)) {
-                endShift(act, expectedCash);
-             }
+             setConfirmData({
+                message: `Tutup shift? Selisih uang adalah ${formatRupiah(act - expectedCash)}`,
+                onConfirm: () => endShift(act, expectedCash)
+             });
            }} 
            disabled={!cashInput}
            className="w-full bg-slate-900 text-white font-bold py-4 rounded-xl shadow-lg disabled:opacity-50"
@@ -86,6 +89,7 @@ export default function ShiftView() {
           Tutup Shift
         </button>
       </div>
+      {confirmData && <ConfirmDialog message={confirmData.message} onConfirm={confirmData.onConfirm} onClose={() => setConfirmData(null)} />}
     </div>
   );
 }
